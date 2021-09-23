@@ -4,29 +4,21 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 )
-
-type ServerTime struct {
-	Hour   		int `json:"saat"`
-	Minute 		int `json:"dakika"`
-	Second      int `json:"saniye"`
-	Millisecond int `json:"milisaniye"`
-}
-
-type TeamInfo struct {
-	Username string `json:"kadi"`
-	Passwd   string `json:"sifre"`
-}
-
-var loginInfo = TeamInfo{"go", "lang"}
 
 func getApiServerTime() (time ServerTime, err error) {
 	resp, err := http.Get("")
 	if err != nil {
 		return ServerTime{}, err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
 
 	var serverTime ServerTime
 	err = json.NewDecoder(resp.Body).Decode(&serverTime)
@@ -47,14 +39,65 @@ func postApiLogin() (int , error) {
 	if err != nil {
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
 	
 	return resp.StatusCode, err
 }
+
+func postApiLockInfo() (int, error) {
+	body, err := json.Marshal(lockInfo)
+	if err != nil {
+		return 0, err
+	}
+
+	resp, err := http.Post("", "", bytes.NewBuffer(body))
+	if err != nil {
+		return 0, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	return resp.StatusCode, err
+}
+
+func postApiTelemetry() (TelemetryResponse ,error) {
+	body, err := json.Marshal(telemetry)
+	if err != nil {
+		return TelemetryResponse{}, err
+	}
+
+	resp, err := http.Post("", "", bytes.NewBuffer(body))
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}(resp.Body)
+
+	err = json.NewDecoder(resp.Body).Decode(&telemetryResp)
+	if err != nil {
+		return TelemetryResponse{}, err
+	}
+	return telemetryResp, err
+}
+
 
 func main() {
 	time, err := getApiServerTime()
 	fmt.Println(time, err)
 	login, err := postApiLogin()
 	fmt.Println(login, err)
+	lock, err := postApiLockInfo()
+	fmt.Println(lock, err)
+	telem, err := postApiTelemetry()
+	fmt.Println(telem, err)
 }
