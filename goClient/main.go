@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	_ "github.com/go-co-op/gocron"
 	"io"
 	"net/http"
 )
@@ -46,7 +47,7 @@ func postApiLogin() (int , error) {
 			fmt.Println(err)
 		}
 	}(resp.Body)
-	
+
 	return resp.StatusCode, err
 }
 
@@ -78,6 +79,9 @@ func postApiTelemetry() (TelemetryResponse ,error) {
 	}
 
 	resp, err := http.Post("", "", bytes.NewBuffer(body))
+	if err != nil {
+		return TelemetryResponse{}, err
+	}
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
