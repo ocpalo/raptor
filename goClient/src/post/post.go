@@ -9,13 +9,14 @@ import (
 )
 
 // TODO::remove error status in the future, nil check is sufficient
-func post(api interface{}) (*http.Response, error) {
+func post(api interface{}, url string) (*http.Response, error) {
 	body, err := json.Marshal(api)
 	if err != nil {
 		return nil, err
 	}
 
-	resp, err := http.Post("", "", bytes.NewBuffer(body))
+	// TODO:: check if contentType is correct
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +36,8 @@ func decodeResponseBody(response *http.Response, str interface{}) error{
 	return nil
 }
 
-func Post(api interface{}, apiResponse interface{}) int {
-	post, err := post(&api)
+func Post(url string ,api interface{}, apiResponse interface{}) int {
+	post, err := post(&api, url)
 	if err != nil {
 		return 0
 	}

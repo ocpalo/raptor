@@ -8,8 +8,8 @@ import (
 )
 
 
-func get() (*http.Response, error) {
-	resp, err := http.Get("")
+func get(url string) (*http.Response, error) {
+	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -29,8 +29,8 @@ func decodeResponseBody(response *http.Response, str interface{}) error {
 	return nil
 }
 
-func Get(i interface{}) int {
-	resp, err := get()
+func Get(url string, i interface{}) int {
+	resp, err := get(url)
 	if err != nil {
 		return 0
 	}

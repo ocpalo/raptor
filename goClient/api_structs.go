@@ -1,5 +1,7 @@
 package main
 
+type LogOut struct {}
+
 type ServerTime struct {
 	Hour   		int `json:"saat"`
 	Minute 		int `json:"dakika"`
