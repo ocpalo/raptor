@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-// TODO:: Modularize after testing POST
+// TODO:: Delete after testing src/get/get.go
 func getApiServerTime() (time ServerTime, err error) {
 	resp, err := http.Get("")
 	if err != nil {
