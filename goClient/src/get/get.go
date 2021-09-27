@@ -7,7 +7,6 @@ import (
 	"net/http"
 )
 
-
 func get(url string) (*http.Response, error) {
 	resp, err := http.Get(url)
 	if err != nil {

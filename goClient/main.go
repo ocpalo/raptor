@@ -2,18 +2,19 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/go-co-op/gocron"
 	"uav_client/src/get"
 	"uav_client/src/post"
+
+	_ "github.com/go-co-op/gocron"
 )
 
 const (
-	commonId = "localhost"
-	getServerTime = "/api/sunucusaati"
-	getApiLogout = "/api/cikis"
+	commonId          = "localhost"
+	getServerTime     = "/api/sunucusaati"
+	getApiLogout      = "/api/cikis"
 	postSendTelemetry = "/api/telemetri_gonder"
-	postLockInfo = "/api/kilitlenme_bilgisi"
-	postApiLogin = "/api/giris"
+	postLockInfo      = "/api/kilitlenme_bilgisi"
+	postApiLogin      = "/api/giris"
 )
 
 func main() {

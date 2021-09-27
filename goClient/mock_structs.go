@@ -14,7 +14,7 @@ var lockInfo = LockInfo{
 		Minute      int `json:"dakika"`
 		Second      int `json:"saniye"`
 		Millisecond int `json:"milisaniye"`
-	}{13, 20 ,20 ,80},
+	}{13, 20, 20, 80},
 	IsLockAutonomous: 0,
 }
 

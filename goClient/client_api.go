@@ -28,4 +28,3 @@ func getApiServerTime() (time ServerTime, err error) {
 
 	return serverTime, err
 }
-
