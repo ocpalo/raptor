@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	_ "github.com/go-co-op/gocron"
 	"uav_client/src/get"
 	"uav_client/src/post"
+
+	_ "github.com/go-co-op/gocron"
 )
 
 const (
