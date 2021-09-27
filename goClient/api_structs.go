@@ -39,13 +39,13 @@ type TelemetryResponse struct {
 	} `json:"sistemSaati"`
 	KonumBilgileri []struct {
 		TakimNumarasi int `json:"takim_numarasi"`
-		IhaEnlem      int `json:"iha_enlem"`
-		IhaBoylam     int `json:"iha_boylam"`
-		IhaIrtifa     int `json:"iha_irtifa"`
-		IhaDikilme    int `json:"iha_dikilme"`
-		IhaYonelme    int `json:"iha_yonelme"`
-		IhaYatis      int `json:"iha_yatis"`
-		ZamanFarki    int `json:"zaman_farki"`
+		IhaEnlem      float32 `json:"iha_enlem"`
+		IhaBoylam     float32 `json:"iha_boylam"`
+		IhaIrtifa     float32 `json:"iha_irtifa"`
+		IhaDikilme    float32 `json:"iha_dikilme"`
+		IhaYonelme    float32 `json:"iha_yonelme"`
+		IhaYatis      float32 `json:"iha_yatis"`
+		ZamanFarki    float32 `json:"zaman_farki"`
 	} `json:"konumBilgileri"`
 }
 

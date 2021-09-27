@@ -29,6 +29,9 @@ func decodeHttpStatus(response *http.Response) int {
 }
 
 func decodeResponseBody(response *http.Response, str interface{}) error{
+	if response.Body == http.NoBody {
+		return nil
+	}
 	err := json.NewDecoder(response.Body).Decode(&str)
 	if err != nil {
 		return err

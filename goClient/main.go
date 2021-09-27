@@ -8,23 +8,25 @@ import (
 )
 
 const (
-	commonId = "localhost"
-	getServerTime = "/api/sunucusaati"
-	getApiLogout = "/api/cikis"
-	postSendTelemetry = "/api/telemetri_gonder"
-	postLockInfo = "/api/kilitlenme_bilgisi"
-	postApiLogin = "/api/giris"
+	commonId = "http://localhost:8080"
+	getServerTime = commonId + "/api/sunucusaati"
+	getApiLogout = commonId + "/api/cikis"
+	postSendTelemetry = commonId + "/api/telemetri_gonder"
+	postLockInfo = commonId + "/api/kilitlenme_bilgisi"
+	postApiLogin = commonId + "/api/giris"
 )
 
 func main() {
-	resp, err := getApiServerTime()
-	fmt.Println(resp, err)
 	status := post.Post(postSendTelemetry, &telemetry, &telemetryResp)
-	fmt.Println(status, telemetryResp)
+	fmt.Println("Telemetri", status, telemetryResp)
 	var time ServerTime
 	status = get.Get(getServerTime, &time)
-	fmt.Println(status, time)
+	fmt.Println("Time", status, time)
 	// TODO:: test if empty struct creates a problem during decoding response body into struct
 	status = get.Get(getApiLogout, LogOut{})
-	fmt.Println(status)
+	fmt.Println("Logout", status)
+	status = post.Post(postLockInfo, &lockInfo, LogOut{})
+	fmt.Println("Kilitlenme", status)
+	status = post.Post(postApiLogin, &loginInfo, LogOut{})
+	fmt.Println("Login", status)
 }

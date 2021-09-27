@@ -1,6 +1,6 @@
 package main
 
-var loginInfo = TeamInfo{"go", "lang"}
+var loginInfo = TeamInfo{"1", "1"}
 
 var lockInfo = LockInfo{
 	LockInit: struct {
