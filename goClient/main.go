@@ -2,21 +2,22 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-co-op/gocron"
-	_ "github.com/go-co-op/gocron"
 	"os"
 	t "time"
 	"uav_client/src/get"
 	"uav_client/src/post"
+
+	"github.com/go-co-op/gocron"
+	_ "github.com/go-co-op/gocron"
 )
 
 const (
-	commonId = "http://localhost:8080"
-	getServerTime = commonId + "/api/sunucusaati"
-	getApiLogout = commonId + "/api/cikis"
+	commonId          = "http://localhost:8080"
+	getServerTime     = commonId + "/api/sunucusaati"
+	getApiLogout      = commonId + "/api/cikis"
 	postSendTelemetry = commonId + "/api/telemetri_gonder"
-	postLockInfo = commonId + "/api/kilitlenme_bilgisi"
-	postApiLogin = commonId + "/api/giris"
+	postLockInfo      = commonId + "/api/kilitlenme_bilgisi"
+	postApiLogin      = commonId + "/api/giris"
 )
 
 /*
@@ -29,14 +30,14 @@ Hata kodlarının açıklamaları Hata kodları başlığında bulunmaktadır.
 yöneticilere özel bağlantılara giriş yapılmaya çalışmaktadır.
  404: Geçersiz URL.
 500: Sunucu içi hata.
- */
+*/
 const (
-	StatusSuccess         		= 200
-	StatusInvalidRequest       	= 400
-	StatusLoginRequired      	= 401
-	StatusUnauthorizedAccess 	= 403
-	StatusInvalidUrl    		= 404
-	StatusInternalError 		= 500
+	StatusSuccess            = 200
+	StatusInvalidRequest     = 400
+	StatusLoginRequired      = 401
+	StatusUnauthorizedAccess = 403
+	StatusInvalidUrl         = 404
+	StatusInternalError      = 500
 )
 
 func print(i interface{}, str string) {
@@ -75,9 +76,9 @@ func task(futureLanded chan bool) {
 	if status == StatusLoginRequired {
 		return
 	} else if status == StatusInvalidRequest ||
-			  status == StatusUnauthorizedAccess ||
-			  status == StatusInvalidUrl ||
-			  status == StatusInternalError {
+		status == StatusUnauthorizedAccess ||
+		status == StatusInvalidUrl ||
+		status == StatusInternalError {
 		fmt.Println("HTTP Status:", status)
 	} else {
 		// TODO:: send telemetry response information to autonomous node and process
@@ -96,6 +97,10 @@ func task(futureLanded chan bool) {
 }
 
 func main() {
+	// TODO:: Testing purpose only, do not forget to remove before merging into main
+	TestBuildLockInfo()
+	TestBuildTelemetryRequest()
+
 	status := post.Post(postSendTelemetry, &telemetry, &telemetryResp)
 	fmt.Println("Telemetri", status, telemetryResp)
 	var time ServerTime

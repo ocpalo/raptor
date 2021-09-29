@@ -28,7 +28,7 @@ func decodeHttpStatus(response *http.Response) int {
 	return response.StatusCode
 }
 
-func decodeResponseBody(response *http.Response, str interface{}) error{
+func decodeResponseBody(response *http.Response, str interface{}) error {
 	if response.Body == http.NoBody {
 		return nil
 	}
@@ -39,7 +39,7 @@ func decodeResponseBody(response *http.Response, str interface{}) error{
 	return nil
 }
 
-func Post(url string ,api interface{}, apiResponse interface{}) int {
+func Post(url string, api interface{}, apiResponse interface{}) int {
 	post, err := post(&api, url)
 	if err != nil {
 		return 0

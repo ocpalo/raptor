@@ -1,10 +1,10 @@
 package main
 
-type LogOut struct {}
+type LogOut struct{}
 
 type ServerTime struct {
-	Hour   		int `json:"saat"`
-	Minute 		int `json:"dakika"`
+	Hour        int `json:"saat"`
+	Minute      int `json:"dakika"`
 	Second      int `json:"saniye"`
 	Millisecond int `json:"milisaniye"`
 }
@@ -16,15 +16,15 @@ type TeamInfo struct {
 
 type LockInfo struct {
 	LockInit struct {
-		Hour       int `json:"saat"`
-		Minute     int `json:"dakika"`
-		Second     int `json:"saniye"`
+		Hour        int `json:"saat"`
+		Minute      int `json:"dakika"`
+		Second      int `json:"saniye"`
 		Millisecond int `json:"milisaniye"`
 	} `json:"kilitlenmeBaslangicZamani"`
 	LockEnd struct {
-		Hour       int `json:"saat"`
-		Minute     int `json:"dakika"`
-		Second     int `json:"saniye"`
+		Hour        int `json:"saat"`
+		Minute      int `json:"dakika"`
+		Second      int `json:"saniye"`
 		Millisecond int `json:"milisaniye"`
 	} `json:"kilitlenmeBitisZamani"`
 	IsLockAutonomous int `json:"otonom_kilitlenme"`
@@ -32,13 +32,13 @@ type LockInfo struct {
 
 type TelemetryResponse struct {
 	SistemSaati struct {
-		Hour      	 int `json:"saat"`
-		Minute    	 int `json:"dakika"`
-		Second    	 int `json:"saniye"`
-		Millisecond	 int `json:"milisaniye"`
+		Hour        int `json:"saat"`
+		Minute      int `json:"dakika"`
+		Second      int `json:"saniye"`
+		Millisecond int `json:"milisaniye"`
 	} `json:"sistemSaati"`
 	KonumBilgileri []struct {
-		TakimNumarasi int `json:"takim_numarasi"`
+		TakimNumarasi int     `json:"takim_numarasi"`
 		IhaEnlem      float32 `json:"iha_enlem"`
 		IhaBoylam     float32 `json:"iha_boylam"`
 		IhaIrtifa     float32 `json:"iha_irtifa"`
