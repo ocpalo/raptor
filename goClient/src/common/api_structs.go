@@ -1,4 +1,4 @@
-package main
+package common
 
 type LogOut struct{}
 
@@ -9,12 +9,12 @@ type ServerTime struct {
 	Millisecond int `json:"milisaniye"`
 }
 
-type TeamInfo struct {
+type TeamInformation struct {
 	Username string `json:"kadi"`
 	Passwd   string `json:"sifre"`
 }
 
-type LockInfo struct {
+type LockInformation struct {
 	LockInit struct {
 		Hour        int `json:"saat"`
 		Minute      int `json:"dakika"`

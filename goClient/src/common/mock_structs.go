@@ -1,8 +1,8 @@
-package main
+package common
 
-var loginInfo = TeamInfo{"1", "1"}
+var LoginInfo = TeamInformation{"1", "1"}
 
-var lockInfo = LockInfo{
+var LockInfo = LockInformation{
 	LockInit: struct {
 		Hour        int `json:"saat"`
 		Minute      int `json:"dakika"`
@@ -18,7 +18,7 @@ var lockInfo = LockInfo{
 	IsLockAutonomous: 0,
 }
 
-var telemetry = TelemetryRequest{
+var TelemReq = TelemetryRequest{
 	TakimNumarasi:  0,
 	IHAEnlem:       1,
 	IHABoylam:      2,
@@ -42,4 +42,4 @@ var telemetry = TelemetryRequest{
 	}{8, 13, 7, 87},
 }
 
-var telemetryResp = TelemetryResponse{}
+var TelemResp = TelemetryResponse{}
