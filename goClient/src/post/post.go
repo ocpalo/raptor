@@ -28,7 +28,7 @@ func decodeHttpStatus(response *http.Response) int {
 	return response.StatusCode
 }
 
-func decodeResponseBody(response *http.Response, str interface{}) error{
+func decodeResponseBody(response *http.Response, str interface{}) error {
 	if response.Body == http.NoBody {
 		return nil
 	}
