@@ -1,11 +1,11 @@
-package main
+package common
 
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
-	"uav_client/src/common"
 )
 
 type StringSplitError struct {
@@ -17,9 +17,9 @@ func (r *StringSplitError) Error() string {
 	return fmt.Sprintf("status %d: err %v", r.StatusCode, r.Err)
 }
 
-func buildTelemetryRequest(i *common.TelemetryRequest, str string) error {
+func BuildTelemetryRequest(i *TelemetryRequest, str string) error {
 	strList := strings.Split(str, " ")
-	fmt.Print(len(strList))
+	log.Print(len(strList))
 	if len(strList) != 18 {
 		return &StringSplitError{
 			StatusCode: -1,
@@ -47,7 +47,7 @@ func buildTelemetryRequest(i *common.TelemetryRequest, str string) error {
 	return nil
 }
 
-func buildLockInfo(i *common.LockInformation, str string) error {
+func BuildLockInfo(i *LockInformation, str string) error {
 	strList := strings.Split(str, " ")
 	if len(strList) != 9 {
 		return &StringSplitError{
@@ -69,12 +69,12 @@ func buildLockInfo(i *common.LockInformation, str string) error {
 
 func TestBuildTelemetryRequest() {
 	var tStr string = "0 1.2 2.3 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17"
-	fmt.Println(buildTelemetryRequest(&common.TelemReq, tStr))
-	fmt.Println(common.TelemReq)
+	log.Println(BuildTelemetryRequest(&TelemReq, tStr))
+	log.Println(TelemReq)
 }
 
 func TestBuildLockInfo() {
 	var tStr string = "0 1 2 3 4 5 6 7 8"
-	fmt.Println(buildLockInfo(&common.LockInfo, tStr))
-	fmt.Println(common.LockInfo)
+	log.Println(BuildLockInfo(&LockInfo, tStr))
+	log.Println(LockInfo)
 }

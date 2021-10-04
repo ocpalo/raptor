@@ -3,9 +3,9 @@ package proxy
 import (
 	"log"
 	t "time"
+	"uav_client/src/common"
 	"uav_client/src/get"
 	"uav_client/src/post"
-	"uav_client/src/common"
 )
 
 var FutLanded = make(chan bool)
@@ -36,6 +36,7 @@ func connectToServer() (valid int) {
 
 func handleStatus(status int) bool {
 	if status == common.StatusLoginRequired {
+		connectedToServer = false
 		return false
 	} else if status == common.StatusInvalidRequest ||
 		status == common.StatusUnauthorizedAccess ||
@@ -52,14 +53,14 @@ func handleStatus(status int) bool {
 
 func ForceLogout() {
 	// After UAV sends Landed signal, we need to shut down this process and send GET method to server
-	// If status from server is not SUCCESS, until we get a SUCCESS response we will send querys 2 times in a second
-	for {
+	// If status from server is not SUCCESS, until we get a SUCCESS response we will send query 1 times in a second
+	for i := 0; i < 10; i++ {
 		status := get.Get(common.GetApiLogout, common.LogOut{})
 		if status == common.StatusSuccess {
 			break
 		}
 		log.Println("Forcing to logout")
-		t.Sleep(t.Millisecond * 500)
+		t.Sleep(t.Millisecond * 1000)
 	}
 }
 
