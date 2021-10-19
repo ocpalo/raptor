@@ -15,9 +15,12 @@ find_package(MAVSDK REQUIRED)
 
 # Specify your app's executable name, and list of source files used to create it.
 add_executable(main
-    main.cpp
+    src/main.cc
+    src/base_drone.cc
     # ... any other source files
 )
+
+target_include_directories(main PRIVATE "header/")
 
 # Specify your app's executable name and a list of linked libraries
 target_link_libraries(main
