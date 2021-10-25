@@ -7,6 +7,7 @@ project(main)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Remove -Werror flag during release and _PRINT_IN_DEBUG_ macro inside debug.h
 # Enable strict handling of warnings
 add_definitions("-Wall -Wextra -Werror")
 

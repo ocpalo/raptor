@@ -1,5 +1,6 @@
 #include "base_drone.h"
 #include "debug.h"
+#include <mavsdk/plugins/telemetry/telemetry.h>
 
 #include <future>
 #include <chrono>
@@ -24,6 +25,9 @@ namespace drone{
             std::this_thread::sleep_for(1s);
         }
         debug_print("System is ready");
+        _mavsdk_telemetry->subscribe_heading([this](mavsdk::Telemetry::Heading heading){
+            this->_heading = heading.heading_deg;
+        });
     }
 
     std::shared_ptr<mavsdk::System> base_drone::get_system(mavsdk::Mavsdk& mavsdk) {
@@ -94,7 +98,7 @@ namespace drone{
         return mavsdk::Action::Result::Success;
     }
 
-    bool base_drone::offboard_init() {
+    mavsdk::Offboard::Result base_drone::offboard_init() {
         debug_print("Starting Offboard velocity control in body coordinates");
 
         mavsdk::Offboard::VelocityBodyYawspeed stay{};
@@ -102,13 +106,27 @@ namespace drone{
 
         if (mavsdk::Offboard::Result offboard_result = _mavsdk_offboard->start(); offboard_result != mavsdk::Offboard::Result::Success) {
             debug_print("Offboard start failed, Offboard::Result:", static_cast<int>(offboard_result));
-            return false;
+            return offboard_result;
         }
 
         debug_print("Offboard started");
-        return true;
+        return mavsdk::Offboard::Result::Success;
     }
 
+    // Need to call offboard_init to switch offboard mode
+    mavsdk::Offboard::Result base_drone::hold() {
+        return _mavsdk_offboard->stop();
+    }
+
+    // TODO:: implement this using promise or something while waiting data from server
+    void base_drone::offboard_hover(int sec) {
+        debug_print("Hovering...");
+        mavsdk::Offboard::VelocityBodyYawspeed stay{};
+        _mavsdk_offboard->set_velocity_body(stay);
+        std::this_thread::sleep_for(std::chrono::seconds(sec));
+    }
+
+    // TODO:: remove sleep_for from move functions
     void base_drone::move_forward(float speed) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.forward_m_s = speed;
@@ -130,11 +148,15 @@ namespace drone{
         std::this_thread::sleep_for(3s);
     }
 
-    // TODO:: implement this using promise or something while waiting data from server
-    void base_drone::hover(int sec) {
-        debug_print("Hovering...");
-        mavsdk::Offboard::VelocityBodyYawspeed stay{};
-        _mavsdk_offboard->set_velocity_body(stay);
-        std::this_thread::sleep_for(std::chrono::seconds(sec));
+    void base_drone::subscribe_heading(double rate_hz) {
+        _mavsdk_telemetry->set_rate_position(rate_hz);
+        _mavsdk_telemetry->subscribe_heading([this](mavsdk::Telemetry::Heading heading){
+            this->_heading = heading.heading_deg;
+            debug_print("Heading: ", this->_heading);
+        });
+    }
+
+    void base_drone::unsubscribe_heading() {
+        _mavsdk_telemetry->subscribe_heading(nullptr);
     }
 }

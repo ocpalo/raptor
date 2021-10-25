@@ -24,6 +24,9 @@ namespace drone{
         std::unique_ptr<mavsdk::Offboard> _mavsdk_offboard = nullptr;
         std::unique_ptr<mavsdk::Telemetry> _mavsdk_telemetry = nullptr;
 
+    private:
+        double _heading;
+
     public:
         base_drone(std::string const& connection_url);
         virtual ~base_drone() = default;
@@ -35,11 +38,16 @@ namespace drone{
         mavsdk::Action::Result arm();
         mavsdk::Action::Result takeoff();
         mavsdk::Action::Result land();
-        bool offboard_init();
+        mavsdk::Offboard::Result hold();
+        mavsdk::Offboard::Result offboard_init();
+        void offboard_hover(int seconds);
         void move_forward(float speed);
         void move_sideways(float speed);
         void move_altitude(float speed);
-        void hover(int seconds);
+
+    private:
+        void subscribe_heading(double rate_hz);
+        void unsubscribe_heading();
     };
 
 }

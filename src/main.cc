@@ -32,7 +32,7 @@ int main(int argc, char** argv)
         b.move_sideways(5);
         b.move_forward(-5);
         b.move_sideways(-5);
-        b.hover(10);
+        b.offboard_hover(10);
         b.land();
     }
     catch(std::runtime_error& ex) {
