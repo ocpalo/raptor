@@ -1,4 +1,4 @@
-#include "base_drone.h"
+#include "raptor.h"
 
 #include <string>
 #include <iostream>
@@ -22,18 +22,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    drone::base_drone b(argv[1]);
+    drone::raptor b(argv[1]);
     try{    
         b.arm();
         b.takeoff();
         b.offboard_init();
-        b.move_forward(5);
-        b.move_altitude(1);
-        b.move_sideways(5);
-        b.move_forward(-5);
-        b.move_sideways(-5);
-        b.offboard_hover(10);
-        b.land();
+        while(!b.move(270));
+    
     }
     catch(std::runtime_error& ex) {
         b.land();

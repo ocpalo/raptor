@@ -28,7 +28,15 @@ namespace drone{
         _mavsdk_telemetry->subscribe_heading([this](mavsdk::Telemetry::Heading heading){
             this->_heading = heading.heading_deg;
         });
+        _mavsdk_telemetry->subscribe_position([this](mavsdk::Telemetry::Position pos){
+            this->_lat_deg = pos.latitude_deg;
+            this->_lon_deg = pos.longitude_deg;
+            this->_abs_alt = pos.absolute_altitude_m;
+            this->_rel_alt = pos.relative_altitude_m;
+        });
     }
+
+    base_drone::~base_drone(){}
 
     std::shared_ptr<mavsdk::System> base_drone::get_system(mavsdk::Mavsdk& mavsdk) {
         debug_print("Waiting to discover system2...");
@@ -131,21 +139,20 @@ namespace drone{
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.forward_m_s = speed;
         _mavsdk_offboard->set_velocity_body(msg);
-        std::this_thread::sleep_for(3s);
+        _previous_forward = speed;
     }
 
     void base_drone::move_sideways(float speed) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.right_m_s = speed;
         _mavsdk_offboard->set_velocity_body(msg);
-        std::this_thread::sleep_for(3s);
+        _previous_sideways = speed;
     }
 
     void base_drone::move_altitude(float speed) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.right_m_s = -speed;
         _mavsdk_offboard->set_velocity_body(msg);
-        std::this_thread::sleep_for(3s);
     }
 
     void base_drone::subscribe_heading(double rate_hz) {
@@ -158,5 +165,15 @@ namespace drone{
 
     void base_drone::unsubscribe_heading() {
         _mavsdk_telemetry->subscribe_heading(nullptr);
+    }
+
+    void base_drone::set_heading(float dest_heading) {
+        auto yaw_rate = (dest_heading - _heading) / 3;
+
+        mavsdk::Offboard::VelocityBodyYawspeed msg{};
+        msg.yawspeed_deg_s = yaw_rate;
+        msg.forward_m_s = _previous_forward;
+        msg.right_m_s = _previous_sideways;
+        _mavsdk_offboard->set_velocity_body(msg);
     }
 }

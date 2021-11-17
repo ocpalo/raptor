@@ -18,6 +18,8 @@ find_package(MAVSDK REQUIRED)
 add_executable(main
     src/main.cc
     src/base_drone.cc
+    src/raptor.cc
+    src/util.cc
     # ... any other source files
 )
 
