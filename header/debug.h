@@ -3,9 +3,6 @@
 
 #include <iostream>
 
-// TODO:: use target_compile_definitions() to generate MACRO or generator expression
-#define _PRINT_IN_DEBUG_
-
 inline
 void debug_print(char const* msg) {
     #ifdef _PRINT_IN_DEBUG_

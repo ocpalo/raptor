@@ -6,6 +6,7 @@
 #include <chrono>
 #include <utility>
 #include <exception>
+#include <optional>
 
 namespace drone{
     using namespace std::chrono_literals;
@@ -25,9 +26,12 @@ namespace drone{
             std::this_thread::sleep_for(1s);
         }
         debug_print("System is ready");
+        debug_print("Subscribed heading");
         _mavsdk_telemetry->subscribe_heading([this](mavsdk::Telemetry::Heading heading){
             this->_heading = heading.heading_deg;
         });
+
+        debug_print("Subscribed position");
         _mavsdk_telemetry->subscribe_position([this](mavsdk::Telemetry::Position pos){
             this->_lat_deg = pos.latitude_deg;
             this->_lon_deg = pos.longitude_deg;
@@ -39,7 +43,7 @@ namespace drone{
     base_drone::~base_drone(){}
 
     std::shared_ptr<mavsdk::System> base_drone::get_system(mavsdk::Mavsdk& mavsdk) {
-        debug_print("Waiting to discover system2...");
+        debug_print("Waiting to discover system...");
         auto prom = std::promise<std::shared_ptr<mavsdk::System>>{};
         auto fut = prom.get_future();
 
@@ -67,7 +71,13 @@ namespace drone{
         return mavsdk::Action::Result::Success;
     }
 
-    mavsdk::Action::Result base_drone::takeoff() {      
+    mavsdk::Action::Result base_drone::takeoff(std::optional<float> altitude) {   
+        if(altitude.has_value()) 
+        {  
+            auto value = altitude.value();
+            _mavsdk_action->set_takeoff_altitude(value);
+            debug_print("Set takeoff altitude:", value);
+        }
         if (const auto takeoff_result = _mavsdk_action->takeoff(); takeoff_result != mavsdk::Action::Result::Success) {
             throw std::runtime_error("Takeoff failed, Action::Result: " + static_cast<int>(takeoff_result));
         }
@@ -83,8 +93,8 @@ namespace drone{
             }
         });
 
-        in_air_future.wait_for(10s);
-        if (in_air_future.wait_for(3s) == std::future_status::timeout) {
+        in_air_future.wait_for(20s);
+        if (in_air_future.wait_for(10s) == std::future_status::timeout) {
             throw std::runtime_error("Takeoff timed out.");
         }
 
@@ -99,7 +109,7 @@ namespace drone{
 
         while (_mavsdk_telemetry->in_air()) {
             debug_print("Vehicle is landing...");
-            std::this_thread::sleep_for(2s);
+            std::this_thread::sleep_for(3s);
         }
         debug_print("Landed!");
         std::this_thread::sleep_for(3s);
@@ -131,28 +141,41 @@ namespace drone{
         debug_print("Hovering...");
         mavsdk::Offboard::VelocityBodyYawspeed stay{};
         _mavsdk_offboard->set_velocity_body(stay);
+        previous_move_ = base_move{};
         std::this_thread::sleep_for(std::chrono::seconds(sec));
     }
 
-    // TODO:: remove sleep_for from move functions
+
+    void base_drone::move(base_move move)
+    {
+        mavsdk::Offboard::VelocityBodyYawspeed msg{};
+        msg.forward_m_s = move.forward;
+        msg.right_m_s = move.right;
+        msg.down_m_s = move.down;
+        _mavsdk_offboard->set_velocity_body(msg);
+        previous_move_ = move;
+        std::this_thread::sleep_for(std::chrono::seconds(10));
+    }
+
     void base_drone::move_forward(float speed) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.forward_m_s = speed;
         _mavsdk_offboard->set_velocity_body(msg);
-        _previous_forward = speed;
+        previous_move_.forward = speed;
     }
 
-    void base_drone::move_sideways(float speed) {
+    void base_drone::move_right(float speed) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.right_m_s = speed;
         _mavsdk_offboard->set_velocity_body(msg);
-        _previous_sideways = speed;
+        previous_move_.right = speed;
     }
 
-    void base_drone::move_altitude(float speed) {
+    void base_drone::move_down(float speed) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
-        msg.right_m_s = -speed;
+        msg.down_m_s = -speed;
         _mavsdk_offboard->set_velocity_body(msg);
+        previous_move_.down = speed;
     }
 
     void base_drone::subscribe_heading(double rate_hz) {
@@ -172,8 +195,8 @@ namespace drone{
 
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.yawspeed_deg_s = yaw_rate;
-        msg.forward_m_s = _previous_forward;
-        msg.right_m_s = _previous_sideways;
+        msg.forward_m_s = previous_move_.forward;
+        msg.right_m_s = previous_move_.right;
         _mavsdk_offboard->set_velocity_body(msg);
     }
 }

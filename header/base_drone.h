@@ -13,6 +13,13 @@
 
 namespace drone{
 
+    struct base_move
+    {
+        float forward = 0;
+        float right = 0;
+        float down = 0;
+    };
+
     class base_drone
     {
     private:
@@ -30,8 +37,7 @@ namespace drone{
         double _lon_deg;
         float _abs_alt;
         float _rel_alt;
-        float _previous_forward = 0;
-        float _previous_sideways = 0;
+        base_move previous_move_;
 
     public:
         base_drone(std::string const& connection_url);
@@ -42,14 +48,15 @@ namespace drone{
 
     public:
         mavsdk::Action::Result arm();
-        mavsdk::Action::Result takeoff();
+        mavsdk::Action::Result takeoff(std::optional<float> altitude = {});
         mavsdk::Action::Result land();
         mavsdk::Offboard::Result hold();
         mavsdk::Offboard::Result offboard_init();
         void offboard_hover(int seconds);
-        void move_forward(float speed);
-        void move_sideways(float speed);
-        void move_altitude(float speed);
+        void move(base_move move);
+        [[deprecated]] void move_forward(float speed);
+        [[deprecated]] void move_right(float speed);
+        [[deprecated]] void move_down(float speed);
         void set_heading(float dest_heading);
 
     protected:

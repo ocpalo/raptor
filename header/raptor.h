@@ -9,6 +9,6 @@ namespace drone {
         raptor(std::string const& connection_url);
         ~raptor() = default;
 
-        bool move(float heading);
+        bool move2(float heading);
     };
 }

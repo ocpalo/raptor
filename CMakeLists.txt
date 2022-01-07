@@ -3,13 +3,16 @@ cmake_minimum_required(VERSION 3.15)
 # Specify your project's name
 project(main)
 
-# Specify at least C++11, better C++17
-set(CMAKE_CXX_STANDARD 17)
+# Specify at least C++11, better C++20
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -fno-omit-frame-pointer -fsanitize=address,undefined -ggdb3")
+set (CMAKE_LINKER_FLAGS_DEBUG "${CMAKE_LINKER_FLAGS_DEBUG} -Wall -Wextra -Wno-error=deprecated-declarations  -fno-omit-frame-pointer -fsanitize=address,undefined -ggdb3")
 
-# Remove -Werror flag during release and _PRINT_IN_DEBUG_ macro inside debug.h
+# Remove -Werror _PRINT_IN_DEBUG_ macro during release
 # Enable strict handling of warnings
-add_definitions("-Wall -Wextra -Werror")
+add_definitions("-D_PRINT_IN_DEBUG_")
 
 # Finds MAVSDK when installed system wide.
 find_package(MAVSDK REQUIRED)
