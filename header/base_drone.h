@@ -18,6 +18,7 @@ namespace drone{
         float forward = 0;
         float right = 0;
         float down = 0;
+        float yaw = 0;
     };
 
     class base_drone

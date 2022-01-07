@@ -152,6 +152,7 @@ namespace drone{
         msg.forward_m_s = move.forward;
         msg.right_m_s = move.right;
         msg.down_m_s = move.down;
+        msg.yawspeed_deg_s = move.yaw;
         _mavsdk_offboard->set_velocity_body(msg);
         previous_move_ = move;
         std::this_thread::sleep_for(std::chrono::seconds(10));
