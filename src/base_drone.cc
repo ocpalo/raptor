@@ -133,6 +133,7 @@ namespace drone{
 
     // Need to call offboard_init to switch offboard mode
     mavsdk::Offboard::Result base_drone::hold() {
+        debug_print("Offboard control stopped");
         return _mavsdk_offboard->stop();
     }
 
@@ -185,10 +186,12 @@ namespace drone{
             this->_heading = heading.heading_deg;
             debug_print("Heading: ", this->_heading);
         });
+        debug_print("Subscribed heading");
     }
 
     void base_drone::unsubscribe_heading() {
         _mavsdk_telemetry->subscribe_heading(nullptr);
+        debug_print("Unsubscribed heading");
     }
 
     void base_drone::set_heading(float dest_heading) {
