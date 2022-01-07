@@ -7,6 +7,7 @@ project(main)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Remove -Werror flag during release and _PRINT_IN_DEBUG_ macro inside debug.h
 # Enable strict handling of warnings
 add_definitions("-Wall -Wextra -Werror")
 
@@ -15,9 +16,14 @@ find_package(MAVSDK REQUIRED)
 
 # Specify your app's executable name, and list of source files used to create it.
 add_executable(main
-    main.cpp
+    src/main.cc
+    src/base_drone.cc
+    src/raptor.cc
+    src/util.cc
     # ... any other source files
 )
+
+target_include_directories(main PRIVATE "header/")
 
 # Specify your app's executable name and a list of linked libraries
 target_link_libraries(main
