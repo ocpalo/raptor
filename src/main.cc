@@ -27,12 +27,15 @@ int main(int argc, char** argv)
         b.arm();
         b.takeoff();
         b.offboard_init();
-        while(!b.move(270));
-    
+        while(!b.move2(120));
     }
     catch(std::runtime_error& ex) {
+        debug_print("Land mode actived, runtime_error:");
+        debug_print(ex.what());
         b.land();
     }
+
+    debug_print("We did it");
 
     return 0;
 }
