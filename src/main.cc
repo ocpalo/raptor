@@ -25,9 +25,9 @@ int main(int argc, char** argv)
     drone::raptor b(argv[1]);
     try{    
         b.arm();
-        b.takeoff();
+        b.takeoff(5);
         b.offboard_init();
-        while(!b.move2(120));
+        b.move_m(0.003, {.forward = -2});
     }
     catch(std::runtime_error& ex) {
         debug_print("Land mode actived, runtime_error:");

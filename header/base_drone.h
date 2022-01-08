@@ -21,6 +21,14 @@ namespace drone{
         float yaw = 0;
     };
 
+    struct base_position
+    {
+        double lat_deg_;
+        double lon_deg_;
+        float abs_alt_;
+        float rel_alt_;
+    };
+
     class base_drone
     {
     private:
@@ -34,10 +42,7 @@ namespace drone{
 
     protected:
         double _heading;
-        double _lat_deg;
-        double _lon_deg;
-        float _abs_alt;
-        float _rel_alt;
+        base_position position_;
         base_move previous_move_;
 
     public:
@@ -55,6 +60,7 @@ namespace drone{
         mavsdk::Offboard::Result offboard_init();
         void offboard_hover(int seconds);
         void move(base_move move);
+        void move_m(double meter, base_move move);
         [[deprecated]] void move_forward(float speed);
         [[deprecated]] void move_right(float speed);
         [[deprecated]] void move_down(float speed);
