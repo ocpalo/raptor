@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"fmt"
 	"log"
 	t "time"
 	"uav_client/src/client"
@@ -81,7 +80,7 @@ func Task(futureLanded chan bool, cli client.Client) {
 	// 		  Suggestion : Reading from Autonomous socket might return integer like 1,2,3
 	//  				   Using this integer, can send appropiate POST,GET using switch, case
 	status := post.Post(common.PostSendTelemetry, &common.TelemReq, &common.TelemResp)
-	cli.Publish("telem/resp", fmt.Sprintf("%v", common.TelemResp))
+	cli.Publish("telem/resp", common.BuildTelemetryResponse(&common.TelemResp))
 	handled := handleStatus(status)
 	log.Println(status, handled)
 	if !handled {

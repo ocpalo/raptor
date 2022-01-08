@@ -67,6 +67,26 @@ func BuildLockInfo(i *LockInformation, str string) error {
 	return nil
 }
 
+func BuildTelemetryResponse(i *TelemetryResponse) string {
+	var resp string
+	resp += strconv.Itoa(i.SistemSaati.Hour) + ","
+	resp += strconv.Itoa(i.SistemSaati.Minute) + ","
+	resp += strconv.Itoa(i.SistemSaati.Second) + ","
+	resp += strconv.Itoa(i.SistemSaati.Millisecond)
+	for index := 0; index < len(i.KonumBilgileri); index++ {
+		resp += "," + fmt.Sprintf("%d", i.KonumBilgileri[index].TakimNumarasi) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaEnlem) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaBoylam) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaIrtifa) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaDikilme) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYonelme) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYatis) + ","
+		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].ZamanFarki)
+	}
+
+	return resp
+}
+
 func TestBuildTelemetryRequest() {
 	var tStr string = "0 1.2 2.3 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17"
 	log.Println(BuildTelemetryRequest(&TelemReq, tStr))
