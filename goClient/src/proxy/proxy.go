@@ -1,8 +1,10 @@
 package proxy
 
 import (
+	"fmt"
 	"log"
 	t "time"
+	"uav_client/src/client"
 	"uav_client/src/common"
 	"uav_client/src/get"
 	"uav_client/src/post"
@@ -64,7 +66,7 @@ func ForceLogout() {
 	}
 }
 
-func Task(futureLanded chan bool) {
+func Task(futureLanded chan bool, cli client.Client) {
 	if !connectedToServer {
 		status := connectToServer()
 		// try to log in. At worst, spends 300 millisecond. If no connection established, returns early
@@ -79,6 +81,7 @@ func Task(futureLanded chan bool) {
 	// 		  Suggestion : Reading from Autonomous socket might return integer like 1,2,3
 	//  				   Using this integer, can send appropiate POST,GET using switch, case
 	status := post.Post(common.PostSendTelemetry, &common.TelemReq, &common.TelemResp)
+	cli.Publish("telem/resp", fmt.Sprintf("%v", common.TelemResp))
 	handled := handleStatus(status)
 	log.Println(status, handled)
 	if !handled {
