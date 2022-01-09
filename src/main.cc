@@ -27,7 +27,7 @@ int main(int argc, char** argv)
         b.arm();
         b.takeoff(5);
         b.offboard_init();
-        b.move_m(20, {.forward = 2});
+        b.move_m(20, {.right = -2});
     }
     catch(std::runtime_error& ex) {
         debug_print("Land mode actived, runtime_error:");

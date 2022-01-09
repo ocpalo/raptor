@@ -13,7 +13,7 @@
 namespace drone{
     using namespace std::chrono_literals;
 
-    base_drone::base_drone(std::string const& connection_url)
+    base_drone::base_drone(std::string const& connection_url) : offboard_(false)
     {
         if (auto connection_result = _mavsdk.add_any_connection(connection_url); connection_result != mavsdk::ConnectionResult::Success) {
             throw std::invalid_argument("Connection url invalid: " + static_cast<int>(connection_result));
@@ -28,18 +28,8 @@ namespace drone{
             std::this_thread::sleep_for(1s);
         }
         debug_print("System is ready");
-        debug_print("Subscribed heading");
-        _mavsdk_telemetry->subscribe_heading([this](mavsdk::Telemetry::Heading heading){
-            this->_heading = heading.heading_deg;
-        });
-
-        debug_print("Subscribed position");
-        _mavsdk_telemetry->subscribe_position([this](mavsdk::Telemetry::Position pos){
-            this->position_.lat_deg_ = pos.latitude_deg;
-            this->position_.lon_deg_ = pos.longitude_deg;
-            this->position_.abs_alt_ = pos.absolute_altitude_m;
-            this->position_.rel_alt_ = pos.relative_altitude_m;
-        });
+        debug_print("Subscription to telemetry operation begin");
+        set_telemetry_subscriptions(2);
     }
 
     base_drone::~base_drone(){}
@@ -63,6 +53,45 @@ namespace drone{
             throw std::runtime_error("No autopilot found");
         }
         return fut.get();
+    }
+
+    void base_drone::set_telemetry_subscriptions(double hz) {
+        debug_print("Subscribed heading");
+        _mavsdk_telemetry->set_rate_position(hz);
+        _mavsdk_telemetry->subscribe_heading([this](mavsdk::Telemetry::Heading heading){
+            this->_heading = heading.heading_deg;
+        });
+
+        debug_print("Subscribed position");
+        _mavsdk_telemetry->subscribe_position([this](mavsdk::Telemetry::Position pos){
+            this->position_.lat_deg_ = pos.latitude_deg;
+            this->position_.lon_deg_ = pos.longitude_deg;
+            this->position_.abs_alt_ = pos.absolute_altitude_m;
+            this->position_.rel_alt_ = pos.relative_altitude_m;
+        });
+
+        debug_print("Subscribed euler angle");
+        auto result = _mavsdk_telemetry->set_rate_attitude(hz);
+        if(result != mavsdk::Telemetry::Result::Success)
+            debug_print("Set Rate Attitude failed. Default rate used");
+        _mavsdk_telemetry->subscribe_attitude_euler([this](mavsdk::Telemetry::EulerAngle euler_angle) {
+            this->attitude_.roll_deg_ = euler_angle.roll_deg;
+            this->attitude_.pitch_deg_ = euler_angle.pitch_deg;
+            this->attitude_.yaw_deg_ = euler_angle.yaw_deg;
+            this->attitude_.timestamp_ = euler_angle.timestamp_us;
+        });
+
+        debug_print("Subscribed battery");
+        _mavsdk_telemetry->set_rate_battery(hz);
+        _mavsdk_telemetry->subscribe_battery([this](mavsdk::Telemetry::Battery battery) {
+             this->battery_remaning_percent_ = battery.remaining_percent;
+        });
+
+        debug_print("Subscribed velocity NED");
+        _mavsdk_telemetry->set_rate_position_velocity_ned(hz);
+        _mavsdk_telemetry->subscribe_velocity_ned([this](mavsdk::Telemetry::VelocityNed velocity) {
+            this->speed_m_s_ = std::max({velocity.north_m_s, velocity.east_m_s, velocity.down_m_s});
+        });
     }
 
     mavsdk::Action::Result base_drone::arm() {
@@ -130,12 +159,14 @@ namespace drone{
         }
 
         debug_print("Offboard started");
+        this->offboard_ = true;
         return mavsdk::Offboard::Result::Success;
     }
 
     // Need to call offboard_init to switch offboard mode
     mavsdk::Offboard::Result base_drone::hold() {
         debug_print("Offboard control stopped");
+        this->offboard_ = false;
         return _mavsdk_offboard->stop();
     }
 
@@ -162,6 +193,8 @@ namespace drone{
         base_position prev = position_;
         while(util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_, position_.lon_deg_) + 0.5 < meter ) {
             this->move(move);
+            // TODO:: for debugging, remove in the future
+            std::cout << position_ << previous_move_ << attitude_ << "Battery: " << battery_remaning_percent_ << " offboard:" << offboard_ << " Speed:" << speed_m_s_ << " Heading:" << _heading << "\n";
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
         this->move({});
@@ -210,5 +243,20 @@ namespace drone{
         msg.forward_m_s = previous_move_.forward;
         msg.right_m_s = previous_move_.right;
         _mavsdk_offboard->set_velocity_body(msg);
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const drone::base_move& base_move) {
+        std::cout << "Forward:" << base_move.forward << " Right:" << base_move.right << " Down:" << base_move.down << " Yaw:" << base_move.yaw << "\n";
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const drone::base_position& base_position) {
+        std::cout << "Lat:" << base_position.lat_deg_ << " Lon:" << base_position.lon_deg_ << " Abs_Alt:" << base_position.abs_alt_ << " Rel_Alt:" << base_position.rel_alt_ << "\n";
+        return stream;
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const drone::base_attitude& base_attitude) {
+        std::cout << "Roll:" << base_attitude.roll_deg_ << " Pitch:" << base_attitude.pitch_deg_ << " Yaw:" << base_attitude.yaw_deg_ << " Timestamp:" << base_attitude.timestamp_ << "\n";
+        return stream;
     }
 }

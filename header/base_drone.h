@@ -19,6 +19,7 @@ namespace drone{
         float right = 0;
         float down = 0;
         float yaw = 0;
+        friend std::ostream& operator<<(std::ostream& stream, const base_move& base_move);
     };
 
     struct base_position
@@ -27,6 +28,16 @@ namespace drone{
         double lon_deg_;
         float abs_alt_;
         float rel_alt_;
+        friend std::ostream& operator<<(std::ostream& stream, const base_position& base_position);
+    };
+
+    struct base_attitude
+    {
+        float roll_deg_;
+        float pitch_deg_;
+        float yaw_deg_;
+        uint16_t timestamp_;
+        friend std::ostream& operator<<(std::ostream& stream, const base_attitude& base_attitude);
     };
 
     class base_drone
@@ -44,6 +55,10 @@ namespace drone{
         double _heading;
         base_position position_;
         base_move previous_move_;
+        base_attitude attitude_;
+        float battery_remaning_percent_;
+        bool offboard_;
+        float speed_m_s_;
 
     public:
         base_drone(std::string const& connection_url);
@@ -51,6 +66,7 @@ namespace drone{
 
     private:
         static std::shared_ptr<mavsdk::System> get_system(mavsdk::Mavsdk& mavsdk);
+        void set_telemetry_subscriptions(double hz);
 
     public:
         mavsdk::Action::Result arm();
