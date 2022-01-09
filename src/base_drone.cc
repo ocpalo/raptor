@@ -160,15 +160,11 @@ namespace drone{
 
     void base_drone::move_m(double meter, base_move move){
         base_position prev = position_;
-        debug_print("Distance: ", util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_, position_.lon_deg_));
         while(util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_, position_.lon_deg_) + 0.5 < meter ) {
             this->move(move);
-            debug_print("Distance: ", util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_, position_.lon_deg_));
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
-
-        std::this_thread::sleep_for(std::chrono::seconds(5));
-        debug_print("Distance: ", util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_, position_.lon_deg_));
+        this->move({});
     }
 
     void base_drone::move_forward(float speed) {
