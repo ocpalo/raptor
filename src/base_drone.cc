@@ -1,5 +1,7 @@
 #include "base_drone.h"
 #include "debug.h"
+#include "util.h"
+
 #include <mavsdk/plugins/telemetry/telemetry.h>
 
 #include <future>
@@ -33,10 +35,10 @@ namespace drone{
 
         debug_print("Subscribed position");
         _mavsdk_telemetry->subscribe_position([this](mavsdk::Telemetry::Position pos){
-            this->_lat_deg = pos.latitude_deg;
-            this->_lon_deg = pos.longitude_deg;
-            this->_abs_alt = pos.absolute_altitude_m;
-            this->_rel_alt = pos.relative_altitude_m;
+            this->position_.lat_deg_ = pos.latitude_deg;
+            this->position_.lon_deg_ = pos.longitude_deg;
+            this->position_.abs_alt_ = pos.absolute_altitude_m;
+            this->position_.rel_alt_ = pos.relative_altitude_m;
         });
     }
 
@@ -133,6 +135,7 @@ namespace drone{
 
     // Need to call offboard_init to switch offboard mode
     mavsdk::Offboard::Result base_drone::hold() {
+        debug_print("Offboard control stopped");
         return _mavsdk_offboard->stop();
     }
 
@@ -145,16 +148,23 @@ namespace drone{
         std::this_thread::sleep_for(std::chrono::seconds(sec));
     }
 
-
-    void base_drone::move(base_move move)
-    {
+    void base_drone::move(base_move move) {
         mavsdk::Offboard::VelocityBodyYawspeed msg{};
         msg.forward_m_s = move.forward;
         msg.right_m_s = move.right;
         msg.down_m_s = move.down;
+        msg.yawspeed_deg_s = move.yaw;
         _mavsdk_offboard->set_velocity_body(msg);
         previous_move_ = move;
-        std::this_thread::sleep_for(std::chrono::seconds(10));
+    }
+
+    void base_drone::move_m(double meter, base_move move){
+        base_position prev = position_;
+        while(util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_, position_.lon_deg_) + 0.5 < meter ) {
+            this->move(move);
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+        this->move({});
     }
 
     void base_drone::move_forward(float speed) {
@@ -184,10 +194,12 @@ namespace drone{
             this->_heading = heading.heading_deg;
             debug_print("Heading: ", this->_heading);
         });
+        debug_print("Subscribed heading");
     }
 
     void base_drone::unsubscribe_heading() {
         _mavsdk_telemetry->subscribe_heading(nullptr);
+        debug_print("Unsubscribed heading");
     }
 
     void base_drone::set_heading(float dest_heading) {
