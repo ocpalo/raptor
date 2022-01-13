@@ -15,7 +15,7 @@ double haversine(double lat1, double lon1, double lat2, double lon2) {
              std::pow(std::sin(dLon / 2), 2) * std::cos(lat1) * std::cos(lat2);
   double rad = 6372797.560856;
   double c = 2 * std::asin(std::sqrt(a));
-  return 6372797.560856 * c;
+  return rad * c;
 }
 
 /*

@@ -3,6 +3,7 @@
 #include <mavsdk/plugins/telemetry/telemetry.h>
 
 #include <chrono>
+#include <cmath>
 #include <exception>
 #include <future>
 #include <optional>
@@ -198,9 +199,11 @@ void base_drone::offboard_hover(int sec) {
 
 void base_drone::move(base_move move) {
   mavsdk::Offboard::VelocityBodyYawspeed msg{};
+  auto downSpeed = position_.rel_alt_ < 3 ? 0 : move.down;
+
   msg.forward_m_s = move.forward;
   msg.right_m_s = move.right;
-  msg.down_m_s = move.down;
+  msg.down_m_s = downSpeed;
   msg.yawspeed_deg_s = move.yaw;
   _mavsdk_offboard->set_velocity_body(msg);
   previous_move_ = move;
@@ -218,8 +221,32 @@ void base_drone::move_m(double meter, base_move move) {
               << "Battery: " << battery_remaning_percent_
               << " offboard:" << offboard_ << " Speed:" << speed_m_s_
               << " Heading:" << _heading << "\n";
-    std::this_thread::sleep_for(std::chrono::seconds(1));
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
+  this->move({});
+}
+
+// Improvements needed
+void base_drone::down_m(double meter, base_move move) {
+  move.down = move.down == 0 ? 3 : move.down;
+  auto current_altitude = position_.rel_alt_;
+
+  auto distance_covered = 0;
+  auto down_speed = 0;
+  mavsdk::Offboard::VelocityBodyYawspeed msg{};
+  while (std::abs(distance_covered - meter < 0.5)) {
+    down_speed = position_.rel_alt_ < 3 ? 0 : move.down;
+    msg.forward_m_s = move.forward;
+    msg.right_m_s = move.right;
+    msg.down_m_s = down_speed;
+    msg.yawspeed_deg_s = move.yaw;
+    _mavsdk_offboard->set_velocity_body(msg);
+
+    previous_move_ = move;
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    distance_covered += std::abs(position_.rel_alt_ - current_altitude);
+  }
+
   this->move({});
 }
 
