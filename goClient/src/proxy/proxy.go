@@ -4,9 +4,8 @@ import (
 	"log"
 	t "time"
 	"uav_client/src/common"
-	"uav_client/src/get"
-	client "uav_client/src/mqtt"
-	"uav_client/src/post"
+	"uav_client/src/http/get"
+	"uav_client/src/http/post"
 )
 
 var FutLanded = make(chan bool)
@@ -35,7 +34,7 @@ func connectToServer() (valid int) {
 	return common.StatusSuccess
 }
 
-func handleStatus(status int) bool {
+func HandleStatus(status int) bool {
 	if status == common.StatusLoginRequired {
 		connectedToServer = false
 		return false
@@ -65,7 +64,7 @@ func ForceLogout() {
 	}
 }
 
-func Task(futureLanded chan bool, cli client.Client) {
+func Task(futureLanded chan bool) {
 	if !connectedToServer {
 		status := connectToServer()
 		// try to log in. At worst, spends 300 millisecond. If no connection established, returns early
@@ -75,10 +74,6 @@ func Task(futureLanded chan bool, cli client.Client) {
 			return
 		}
 	}
-
-	// TODO:: read from UNIX Socket, then send appropiate POST or GET method
-	// 		  Suggestion : Reading from Autonomous socket might return integer like 1,2,3
-	//  				   Using this integer, can send appropiate POST,GET using switch, case
 
 	// TODO:: modify landed variable when UAV landed, ipc needed
 	// if landed, stop executing the process. when futureLanded set true, it terminates the program

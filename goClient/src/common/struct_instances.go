@@ -8,40 +8,38 @@ var LockInfo = LockInformation{
 		Minute      int `json:"dakika"`
 		Second      int `json:"saniye"`
 		Millisecond int `json:"milisaniye"`
-	}{12, 20, 20, 80},
+	}{0, 0, 0, 0},
 	LockEnd: struct {
 		Hour        int `json:"saat"`
 		Minute      int `json:"dakika"`
 		Second      int `json:"saniye"`
 		Millisecond int `json:"milisaniye"`
-	}{13, 20, 20, 80},
+	}{0, 0, 0, 0},
 	IsLockAutonomous: 0,
 }
 
 var TelemReq = TelemetryRequest{
 	TakimNumarasi:  0,
-	IHAEnlem:       1,
-	IHABoylam:      2,
-	IHAIrtifa:      3,
-	IHADikilme:     4,
-	IHAYonelme:     5,
-	IHAYatis:       6,
-	IHAHiz:         7,
-	IHABatarya:     8,
-	IHAOtonom:      1,
-	IHAKilitlenme:  9,
-	HedefMerkezX:   8,
-	HedefMerkezY:   8,
-	HedefGenislik:  8,
-	HedefYukseklik: 8,
+	IHAEnlem:       0,
+	IHABoylam:      0,
+	IHAIrtifa:      0,
+	IHADikilme:     0,
+	IHAYonelme:     0,
+	IHAYatis:       0,
+	IHAHiz:         0,
+	IHABatarya:     0,
+	IHAOtonom:      0,
+	IHAKilitlenme:  0,
+	HedefMerkezX:   0,
+	HedefMerkezY:   0,
+	HedefGenislik:  0,
+	HedefYukseklik: 0,
 	GPSSaati: struct {
 		Saat       int `json:"saat"`
 		Dakika     int `json:"dakika"`
 		Saniye     int `json:"saniye"`
 		Milisaniye int `json:"milisaniye"`
-	}{8, 13, 7, 87},
+	}{0, 0, 0, 0},
 }
 
-
 var TelemResp = TelemetryResponse{}
-
