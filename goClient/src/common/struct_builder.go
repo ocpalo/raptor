@@ -19,11 +19,10 @@ func (r *StringSplitError) Error() string {
 
 func BuildTelemetryRequest(i *TelemetryRequest, str string) error {
 	strList := strings.Split(str, " ")
-	log.Print(len(strList))
 	if len(strList) != 18 {
 		return &StringSplitError{
 			StatusCode: -1,
-			Err:        errors.New("not enough string"),
+			Err:        errors.New("parsed string array size is not correct"),
 		}
 	}
 	i.TakimNumarasi, _ = strconv.Atoi(strList[0])
@@ -52,7 +51,7 @@ func BuildLockInfo(i *LockInformation, str string) error {
 	if len(strList) != 9 {
 		return &StringSplitError{
 			StatusCode: -1,
-			Err:        errors.New("not enough string"),
+			Err:        errors.New("parsed string array size is not correct"),
 		}
 	}
 	i.LockInit.Hour, _ = strconv.Atoi(strList[0])
@@ -84,7 +83,6 @@ func BuildTelemetryResponse(i *TelemetryResponse) string {
 		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYatis) + ","
 		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].ZamanFarki)
 	}
-
 	return resp
 }
 

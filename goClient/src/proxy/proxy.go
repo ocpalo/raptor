@@ -3,9 +3,9 @@ package proxy
 import (
 	"log"
 	t "time"
-	"uav_client/src/client"
 	"uav_client/src/common"
 	"uav_client/src/get"
+	client "uav_client/src/mqtt"
 	"uav_client/src/post"
 )
 
@@ -79,14 +79,6 @@ func Task(futureLanded chan bool, cli client.Client) {
 	// TODO:: read from UNIX Socket, then send appropiate POST or GET method
 	// 		  Suggestion : Reading from Autonomous socket might return integer like 1,2,3
 	//  				   Using this integer, can send appropiate POST,GET using switch, case
-	status := post.Post(common.PostSendTelemetry, &common.TelemReq, &common.TelemResp)
-	cli.Publish("telem/resp", common.BuildTelemetryResponse(&common.TelemResp))
-	handled := handleStatus(status)
-	log.Println(status, handled)
-	if !handled {
-		// TODO:: Decide what happens if response from POST method is not SUCCESS
-		return
-	}
 
 	// TODO:: modify landed variable when UAV landed, ipc needed
 	// if landed, stop executing the process. when futureLanded set true, it terminates the program
