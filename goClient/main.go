@@ -10,11 +10,17 @@ import (
 	"uav_client/src/post"
 	"uav_client/src/proxy"
 
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/go-co-op/gocron"
 )
 
 func print(i interface{}, str string) {
 	fmt.Println(str, i)
+}
+
+func telemetryCallback(client mqtt.Client, msg mqtt.Message) {
+	common.BuildTelemetryRequest(&common.TelemReq, string(msg.Payload()))
+	print(common.TelemReq, "Test")
 }
 
 const debug = 1
@@ -34,6 +40,7 @@ func main() {
 
 	scheduler := gocron.NewScheduler(t.UTC)
 	scheduler.Every(3).Second().Do(proxy.Task, proxy.FutLanded, cli)
+	cli.Subscribe("raptor/telemetry", telemetryCallback)
 
 	scheduler.StartAsync()
 

@@ -67,6 +67,7 @@ func BuildLockInfo(i *LockInformation, str string) error {
 	return nil
 }
 
+// Send only 1 team KonumBilgileri instead of whole slice
 func BuildTelemetryResponse(i *TelemetryResponse) string {
 	var resp string
 	resp += strconv.Itoa(i.SistemSaati.Hour) + ","

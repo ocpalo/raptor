@@ -40,7 +40,7 @@ func (c *Client) Init(port int, host string) {
 	}
 }
 
-func (c *Client) Subscribe(topic string) {
+func (c *Client) Subscribe(topic string, f func(client mqtt.Client, msg mqtt.Message)) {
 	if token := c.client.Subscribe(topic, 1, f); token.Wait() && token.Error() != nil {
 		log.Fatalln(token.Error())
 		return
