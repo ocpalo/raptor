@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"uav_client/src/common"
+	"uav_client/src/http/get"
 	"uav_client/src/http/post"
 	"uav_client/src/proxy"
 
@@ -17,6 +18,8 @@ type Client struct {
 	client            mqtt.Client
 }
 
+var FutLanded = make(chan bool)
+
 func (c *Client) TelemetryCallback(client mqtt.Client, msg mqtt.Message) {
 	common.BuildTelemetryRequest(&common.TelemReq, string(msg.Payload()))
 	status := post.Post(common.PostSendTelemetry, &common.TelemReq, &common.TelemResp)
@@ -28,13 +31,13 @@ func (c *Client) TelemetryCallback(client mqtt.Client, msg mqtt.Message) {
 	c.Publish("raptor/telemetry/response", common.BuildTelemetryResponse(&common.TelemResp))
 }
 
-func contains(slice []string, value string) bool {
-	for _, n := range slice {
-		if value == n {
-			return true
-		}
+func (c *Client) LandCallback(client mqtt.Client, msg mqtt.Message) {
+	status := get.Get(common.GetApiLogout, common.LogOut{})
+	if status == common.StatusSuccess {
+		FutLanded <- true
+		return
 	}
-	return false
+	forceLogout()
 }
 
 func (c *Client) Init(port int, host string) {
@@ -55,7 +58,7 @@ func (c *Client) Subscribe(topic string) {
 			return
 		}
 	} else if topic == "raptor/land" {
-		if token := c.client.Subscribe(topic, 1, c.TelemetryCallback); token.Wait() && token.Error() != nil {
+		if token := c.client.Subscribe(topic, 1, c.LandCallback); token.Wait() && token.Error() != nil {
 			log.Fatalln(token.Error())
 			return
 		}

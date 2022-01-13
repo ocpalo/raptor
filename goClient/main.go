@@ -5,7 +5,6 @@ import (
 	"os"
 	t "time"
 	"uav_client/src/common"
-	"uav_client/src/http/get"
 	"uav_client/src/http/post"
 	client "uav_client/src/mqtt"
 	"uav_client/src/proxy"
@@ -29,17 +28,14 @@ func main() {
 	fmt.Println("Login", status)
 
 	scheduler := gocron.NewScheduler(t.UTC)
-	scheduler.Every(3).Second().Do(proxy.Task, proxy.FutLanded)
+	scheduler.Every(3).Second().Do(proxy.Task)
 	cli.Subscribe("raptor/telemetry")
+	cli.Subscribe("raptor/land")
 
 	scheduler.StartAsync()
 
 	select {
-	case <-proxy.FutLanded:
-		status := get.Get(common.GetApiLogout, common.LogOut{})
-		if status != common.StatusSuccess {
-			proxy.ForceLogout()
-		}
+	case <-client.FutLanded:
 		os.Exit(0)
 	}
 }

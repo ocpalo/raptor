@@ -4,12 +4,9 @@ import (
 	"log"
 	t "time"
 	"uav_client/src/common"
-	"uav_client/src/http/get"
 	"uav_client/src/http/post"
 )
 
-var FutLanded = make(chan bool)
-var landed bool = false
 var connectedToServer bool = false
 
 func connectToServer() (valid int) {
@@ -51,20 +48,7 @@ func HandleStatus(status int) bool {
 	}
 }
 
-func ForceLogout() {
-	// After UAV sends Landed signal, we need to shut down this process and send GET method to server
-	// If status from server is not SUCCESS, until we get a SUCCESS response we will send query 1 times in a second
-	for i := 0; i < 10; i++ {
-		status := get.Get(common.GetApiLogout, common.LogOut{})
-		if status == common.StatusSuccess {
-			break
-		}
-		log.Println("Forcing to logout")
-		t.Sleep(t.Millisecond * 1000)
-	}
-}
-
-func Task(futureLanded chan bool) {
+func Task() {
 	if !connectedToServer {
 		status := connectToServer()
 		// try to log in. At worst, spends 300 millisecond. If no connection established, returns early
@@ -73,12 +57,5 @@ func Task(futureLanded chan bool) {
 			log.Println("Connection to server failed")
 			return
 		}
-	}
-
-	// TODO:: modify landed variable when UAV landed, ipc needed
-	// if landed, stop executing the process. when futureLanded set true, it terminates the program
-	if landed {
-		FutLanded <- true
-		return
 	}
 }
