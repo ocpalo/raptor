@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -73,16 +74,17 @@ func BuildTelemetryResponse(i *TelemetryResponse) string {
 	resp += strconv.Itoa(i.SistemSaati.Minute) + ","
 	resp += strconv.Itoa(i.SistemSaati.Second) + ","
 	resp += strconv.Itoa(i.SistemSaati.Millisecond)
-	for index := 0; index < len(i.KonumBilgileri); index++ {
-		resp += "," + fmt.Sprintf("%d", i.KonumBilgileri[index].TakimNumarasi) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaEnlem) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaBoylam) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaIrtifa) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaDikilme) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYonelme) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYatis) + ","
-		resp += fmt.Sprintf("%f", i.KonumBilgileri[index].ZamanFarki)
-	}
+
+	index := findOptimumTarget(i, &TelemReq, LockedIndex)
+	resp += "," + fmt.Sprintf("%d", i.KonumBilgileri[index].TakimNumarasi) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaEnlem) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaBoylam) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaIrtifa) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaDikilme) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYonelme) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYatis) + ","
+	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].ZamanFarki)
+
 	return resp
 }
 
@@ -96,4 +98,43 @@ func TestBuildLockInfo() {
 	var tStr string = "0 1 2 3 4 5 6 7 8"
 	log.Println(BuildLockInfo(&LockInfo, tStr))
 	log.Println(LockInfo)
+}
+
+var LockedIndex = 1
+
+func findOptimumTarget(i *TelemetryResponse, j *TelemetryRequest, previousLockedIndex int) (index int) {
+	minDistance := math.MaxFloat64
+	targetIndex := 0
+	for index := 0; index < len(i.KonumBilgileri); index++ {
+		if LockedIndex == -1 || previousLockedIndex == i.KonumBilgileri[index].TakimNumarasi {
+			continue
+		}
+		tmpDistance := distance(j.IHAEnlem, j.IHABoylam, float64(i.KonumBilgileri[index].IhaEnlem), float64(i.KonumBilgileri[index].IhaBoylam))
+		if minDistance > tmpDistance {
+			minDistance = tmpDistance
+			targetIndex = index
+		}
+	}
+	return targetIndex
+}
+
+const (
+	earthRaidusM = 6372797.560856 // radius of the earth in meter.
+)
+
+func distance(src_lat, src_lon, dst_lat, dst_lon float64) (m float64) {
+	lat1 := (src_lat * math.Pi / 180)
+	lon1 := (src_lon * math.Pi / 180)
+	lat2 := (dst_lat * math.Pi / 180)
+	lon2 := (dst_lon * math.Pi / 180)
+
+	diffLat := lat2 - lat1
+	diffLon := lon2 - lon1
+
+	a := math.Pow(math.Sin(diffLat/2), 2) + math.Cos(lat1)*math.Cos(lat2)*
+		math.Pow(math.Sin(diffLon/2), 2)
+
+	c := 2 * math.Atan2(math.Sqrt(a), math.Sqrt(1-a))
+	m = c * earthRaidusM
+	return m
 }
