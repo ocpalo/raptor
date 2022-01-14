@@ -100,13 +100,14 @@ func TestBuildLockInfo() {
 	log.Println(LockInfo)
 }
 
-var LockedIndex = 1
+// TODO:: Modify this variable when locked info came
+var LockedIndex = -1
 
 func findOptimumTarget(i *TelemetryResponse, j *TelemetryRequest, previousLockedIndex int) (index int) {
 	minDistance := math.MaxFloat64
 	targetIndex := 0
 	for index := 0; index < len(i.KonumBilgileri); index++ {
-		if LockedIndex == -1 || previousLockedIndex == i.KonumBilgileri[index].TakimNumarasi {
+		if previousLockedIndex == i.KonumBilgileri[index].TakimNumarasi {
 			continue
 		}
 		tmpDistance := distance(j.IHAEnlem, j.IHABoylam, float64(i.KonumBilgileri[index].IhaEnlem), float64(i.KonumBilgileri[index].IhaBoylam))
