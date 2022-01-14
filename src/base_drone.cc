@@ -10,6 +10,7 @@
 #include <utility>
 
 #include "debug.h"
+#include "mavsdk/plugins/param/param.h"
 #include "util.h"
 
 namespace drone {
@@ -33,6 +34,12 @@ base_drone::base_drone(std::string const& connection_url) : offboard_(false) {
   debug_print("System is ready");
   debug_print("Subscription to telemetry operation begin");
   set_telemetry_subscriptions(2);
+
+#ifdef _PRINT_IN_DEBUG_
+  debug_print("Setting `COM_RCL_EXCEPT` parameter to 4");
+  auto param = mavsdk::Param(_mavsdk_system);
+  param.set_param_int("COM_RCL_EXCEPT", 4);
+#endif
 }
 
 base_drone::~base_drone() {}

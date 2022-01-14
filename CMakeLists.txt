@@ -34,5 +34,6 @@ target_link_libraries(main
     MAVSDK::mavsdk_action      # If action plugin used by app ...
     MAVSDK::mavsdk_telemetry   #If telemetry plugin used by app ...
     MAVSDK::mavsdk_offboard
+    MAVSDK::mavsdk_param
     # ... Any other linked libraries
 )
