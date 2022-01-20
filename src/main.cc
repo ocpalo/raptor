@@ -4,6 +4,7 @@
 #include <thread>
 
 #include "mqtt.h"
+#include "raptor.h"
 
 void usage(const std::string &bin_name) {
   std::cerr
@@ -16,20 +17,14 @@ void usage(const std::string &bin_name) {
 }
 
 int main(int argc, char **argv) {
-  drone::mqtt::client_mqtt climqtt(drone::SERVER_ADDRESS, drone::CLIENT_ID);
-
-  climqtt.connect();
-  climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, "hello world!");
-  climqtt.subscribe("raptor/telemetry");
-  int i = 0;
-  while (i < 10) {
-    auto resp = climqtt.consume();
-    if (resp.has_value()) {
-      std::cout << resp.value().first << " " << resp.value().second << "\n";
-    }
-    i++;
-    std::this_thread::sleep_for(std::chrono::milliseconds(800));
-  }
-  climqtt.disconnect();
+  drone::raptor raptor(argv[1]);
+  raptor.arm();
+  raptor.takeoff();
+  raptor.offboard_init();
+  auto fut = std::async(std::launch::async, &drone::raptor::publish_telemetry,
+                        &raptor);
+  raptor.move_m(10, {.forward = 3});
+  raptor.move_m(10, {.right = 3});
+  raptor.stopPublish();
   return 0;
 }
