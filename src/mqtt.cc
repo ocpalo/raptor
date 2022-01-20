@@ -1,6 +1,11 @@
 #include "mqtt.h"
 
+#include <optional>
+#include <string>
+#include <utility>
+
 #include "debug.h"
+#include "mqtt/client.h"
 
 namespace drone {
 namespace mqtt {
@@ -24,6 +29,18 @@ client_mqtt::client_mqtt(std::string const& server_address,
 void client_mqtt::publish(std::string const& topic, std::string const& msg) {
   client_.publish(::mqtt::message(topic, msg, QOS_, false));
   debug_print("Send message", msg);
+}
+
+std::optional<std::pair<std::string, std::string>> client_mqtt::consume() {
+  auto msg = this->client_.consume_message();
+  if (msg) {
+    return std::make_pair(msg->get_topic(), msg->to_string());
+  } else
+    return std::nullopt;
+}
+
+void client_mqtt::subscribe(std::string const& topic) {
+  client_.subscribe(topic, QOS_);
 }
 
 bool client_mqtt::connect() {

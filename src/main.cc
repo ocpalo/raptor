@@ -1,5 +1,7 @@
+#include <chrono>
 #include <iostream>
 #include <string>
+#include <thread>
 
 #include "mqtt.h"
 
@@ -18,6 +20,16 @@ int main(int argc, char **argv) {
 
   climqtt.connect();
   climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, "hello world!");
+  climqtt.subscribe("raptor/telemetry");
+  int i = 0;
+  while (i < 10) {
+    auto resp = climqtt.consume();
+    if (resp.has_value()) {
+      std::cout << resp.value().first << " " << resp.value().second << "\n";
+    }
+    i++;
+    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+  }
   climqtt.disconnect();
   return 0;
 }

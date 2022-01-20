@@ -1,6 +1,10 @@
 #ifndef MQTT_H
 #define MQTT_H
 
+#include <optional>
+#include <string>
+#include <utility>
+
 #include "mqtt/client.h"
 
 namespace drone {
@@ -19,6 +23,8 @@ class client_mqtt {
   client_mqtt(std::string const& server_address, std::string const& client_id,
               int QOS);
   void publish(std::string const& topic, std::string const& msg);
+  void subscribe(std::string const& topic);
+  std::optional<std::pair<std::string, std::string>> consume();
   bool connect();
   void disconnect();
   bool isConnected() const;
