@@ -1,8 +1,7 @@
 #include <iostream>
 #include <string>
 
-#include "base_drone.h"
-#include "raptor.h"
+#include "mqtt.h"
 
 void usage(const std::string &bin_name) {
   std::cerr
@@ -15,25 +14,11 @@ void usage(const std::string &bin_name) {
 }
 
 int main(int argc, char **argv) {
-  if (argc != 2) {
-    usage(argv[0]);
-    return 1;
-  }
+  drone::raptor_mqtt::client_mqtt climqtt(drone::SERVER_ADDRESS,
+                                          drone::CLIENT_ID);
 
-  drone::raptor b(argv[1]);
-  try {
-    b.arm();
-    b.takeoff(10);
-    b.offboard_init();
-    b.down_m(3, {.down = 3});
-    b.down_m(3, {.down = -3});
-  } catch (std::runtime_error &ex) {
-    debug_print("Land mode actived, runtime_error:");
-    debug_print(ex.what());
-    b.land();
-  }
-
-  debug_print("We did it");
-
+  climqtt.connect();
+  climqtt.publish(drone::raptor_mqtt::TELEMETRY_TOPIC, "hello world!");
+  climqtt.disconnect();
   return 0;
 }
