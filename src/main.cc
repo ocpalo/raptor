@@ -14,11 +14,10 @@ void usage(const std::string &bin_name) {
 }
 
 int main(int argc, char **argv) {
-  drone::raptor_mqtt::client_mqtt climqtt(drone::SERVER_ADDRESS,
-                                          drone::CLIENT_ID);
+  drone::mqtt::client_mqtt climqtt(drone::SERVER_ADDRESS, drone::CLIENT_ID);
 
   climqtt.connect();
-  climqtt.publish(drone::raptor_mqtt::TELEMETRY_TOPIC, "hello world!");
+  climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, "hello world!");
   climqtt.disconnect();
   return 0;
 }

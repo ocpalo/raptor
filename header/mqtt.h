@@ -7,7 +7,7 @@ namespace drone {
 constexpr auto SERVER_ADDRESS{"tcp://localhost:1883"};
 constexpr auto CLIENT_ID{"raptor"};
 
-namespace raptor_mqtt {
+namespace mqtt {
 constexpr auto TELEMETRY_TOPIC{"raptor/telemetry"};
 constexpr auto TELEMETRY_RESPONSE_TOPIC{"raptor/telemetry/response"};
 constexpr auto LAND_TOPIC{"raptor/land"};
@@ -21,13 +21,15 @@ class client_mqtt {
   void publish(std::string const& topic, std::string const& msg);
   bool connect();
   void disconnect();
+  bool isConnected() const;
+  bool reconnect();
 
  private:
-  mqtt::client client_;
-  mqtt::connect_options connOpts_;
+  ::mqtt::client client_;
+  ::mqtt::connect_options connOpts_;
   int QOS_ = MQTT_QOS;
 };
-}  // namespace raptor_mqtt
+}  // namespace mqtt
 }  // namespace drone
 
 #endif
