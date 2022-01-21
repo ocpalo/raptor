@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
                         &raptor);
   raptor.move_m(10, {.forward = 3});
   raptor.move_m(10, {.right = 3});
-  raptor.stopPublish();
+  raptor.stop_publish_telemetry();
+  raptor.land();
   return 0;
 }

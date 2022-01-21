@@ -1,6 +1,7 @@
 #include "raptor.h"
 
 #include <chrono>
+#include <sstream>
 #include <string>
 #include <thread>
 
@@ -24,55 +25,29 @@ bool raptor::move2(float heading) {
   return true;
 }
 
-void raptor::stopPublish() { _publish = false; }
+void raptor::land() {
+  base_drone::land();
+  _climqtt.publish(drone::mqtt::LAND_TOPIC, "1");
+}
 
 void raptor::publish_telemetry() {
-  while (this->_publish) {
-    _climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, buildTelemetryMessage());
+  while (_publish_telemetry) {
+    _climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, build_telemetry_message());
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
   }
 }
 
-std::string raptor::buildTelemetryMessage() {
-  std::string str = "";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(position_.lat_deg_);
-  str += " ";
-  str += std::to_string(position_.lon_deg_);
-  str += " ";
-  str += std::to_string(position_.rel_alt_);
-  str += " ";
-  str += std::to_string(attitude_.roll_deg_);
-  str += " ";
-  str += std::to_string(attitude_.pitch_deg_);
-  str += " ";
-  str += std::to_string(attitude_.yaw_deg_);
-  str += " ";
-  str += std::to_string(speed_m_s_);
-  str += " ";
-  str += std::to_string(battery_remaning_percent_);
-  str += " ";
-  str += std::to_string(1);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  str += " ";
-  str += std::to_string(0);
-  return str;
+void raptor::stop_publish_telemetry() { _publish_telemetry = false; }
+
+std::string raptor::build_telemetry_message() {
+  std::stringstream str;
+  str << 0 << " " << position_.lat_deg_ << " " << position_.lon_deg_ << " "
+      << position_.rel_alt_ << " " << attitude_.roll_deg_ << " "
+      << attitude_.pitch_deg_ << " " << attitude_.yaw_deg_ << " " << speed_m_s_
+      << " " << battery_remaning_percent_ << " " << 1 << " " << 0 << " " << 0
+      << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0
+      << " " << 0;
+  return str.str();
 }
 
 }  // namespace drone
