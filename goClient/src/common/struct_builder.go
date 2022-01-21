@@ -20,7 +20,7 @@ func (r *StringSplitError) Error() string {
 
 func BuildTelemetryRequest(i *TelemetryRequest, str string) error {
 	strList := strings.Split(str, " ")
-	if len(strList) != 18 {
+	if len(strList) != 19 {
 		return &StringSplitError{
 			StatusCode: -1,
 			Err:        errors.New("parsed string array size is not correct"),
@@ -30,20 +30,21 @@ func BuildTelemetryRequest(i *TelemetryRequest, str string) error {
 	i.IHAEnlem, _ = strconv.ParseFloat(strList[1], 64)
 	i.IHABoylam, _ = strconv.ParseFloat(strList[2], 64)
 	i.IHAIrtifa, _ = strconv.ParseFloat(strList[3], 64)
-	i.IHADikilme, _ = strconv.Atoi(strList[4])
-	i.IHAYatis, _ = strconv.Atoi(strList[5])
-	i.IHAHiz, _ = strconv.Atoi(strList[6])
-	i.IHABatarya, _ = strconv.Atoi(strList[7])
-	i.IHAOtonom, _ = strconv.Atoi(strList[8])
-	i.IHAKilitlenme, _ = strconv.Atoi(strList[9])
-	i.HedefMerkezX, _ = strconv.Atoi(strList[10])
-	i.HedefMerkezY, _ = strconv.Atoi(strList[11])
-	i.HedefGenislik, _ = strconv.Atoi(strList[12])
-	i.HedefYukseklik, _ = strconv.Atoi(strList[13])
-	i.GPSSaati.Saat, _ = strconv.Atoi(strList[14])
-	i.GPSSaati.Dakika, _ = strconv.Atoi(strList[15])
-	i.GPSSaati.Saniye, _ = strconv.Atoi(strList[16])
-	i.GPSSaati.Milisaniye, _ = strconv.Atoi(strList[17])
+	i.IHADikilme, _ = strconv.ParseFloat(strList[4], 64)
+	i.IHAYonelme, _ = strconv.ParseFloat(strList[5], 64)
+	i.IHAYatis, _ = strconv.ParseFloat(strList[6], 64)
+	i.IHAHiz, _ = strconv.ParseFloat(strList[7], 64)
+	i.IHABatarya, _ = strconv.ParseFloat(strList[8], 64)
+	i.IHAOtonom, _ = strconv.Atoi(strList[9])
+	i.IHAKilitlenme, _ = strconv.Atoi(strList[10])
+	i.HedefMerkezX, _ = strconv.ParseFloat(strList[11], 64)
+	i.HedefMerkezY, _ = strconv.ParseFloat(strList[12], 64)
+	i.HedefGenislik, _ = strconv.ParseFloat(strList[13], 64)
+	i.HedefYukseklik, _ = strconv.ParseFloat(strList[14], 64)
+	i.GPSSaati.Saat, _ = strconv.Atoi(strList[15])
+	i.GPSSaati.Dakika, _ = strconv.Atoi(strList[16])
+	i.GPSSaati.Saniye, _ = strconv.Atoi(strList[17])
+	i.GPSSaati.Milisaniye, _ = strconv.Atoi(strList[18])
 	return nil
 }
 
@@ -83,7 +84,7 @@ func BuildTelemetryResponse(i *TelemetryResponse) string {
 	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaDikilme) + ","
 	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYonelme) + ","
 	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].IhaYatis) + ","
-	resp += fmt.Sprintf("%f", i.KonumBilgileri[index].ZamanFarki)
+	resp += fmt.Sprintf("%d", i.KonumBilgileri[index].ZamanFarki)
 
 	return resp
 }

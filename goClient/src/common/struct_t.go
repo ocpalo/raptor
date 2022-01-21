@@ -39,13 +39,13 @@ type TelemetryResponse struct {
 	} `json:"sistemSaati"`
 	KonumBilgileri []struct {
 		TakimNumarasi int     `json:"takim_numarasi"`
-		IhaEnlem      float32 `json:"iha_enlem"`
-		IhaBoylam     float32 `json:"iha_boylam"`
-		IhaIrtifa     float32 `json:"iha_irtifa"`
-		IhaDikilme    float32 `json:"iha_dikilme"`
-		IhaYonelme    float32 `json:"iha_yonelme"`
-		IhaYatis      float32 `json:"iha_yatis"`
-		ZamanFarki    float32 `json:"zaman_farki"`
+		IhaEnlem      float64 `json:"iha_enlem"`
+		IhaBoylam     float64 `json:"iha_boylam"`
+		IhaIrtifa     float64 `json:"iha_irtifa"`
+		IhaDikilme    float64 `json:"iha_dikilme"`
+		IhaYonelme    float64 `json:"iha_yonelme"`
+		IhaYatis      float64 `json:"iha_yatis"`
+		ZamanFarki    int     `json:"zaman_farki"`
 	} `json:"konumBilgileri"`
 }
 
@@ -54,17 +54,17 @@ type TelemetryRequest struct {
 	IHAEnlem       float64 `json:"IHA_enlem"`
 	IHABoylam      float64 `json:"IHA_boylam"`
 	IHAIrtifa      float64 `json:"IHA_irtifa"`
-	IHADikilme     int     `json:"IHA_dikilme"`
-	IHAYonelme     int     `json:"IHA_yonelme"`
-	IHAYatis       int     `json:"IHA_yatis"`
-	IHAHiz         int     `json:"IHA_hiz"`
-	IHABatarya     int     `json:"IHA_batarya"`
+	IHADikilme     float64 `json:"IHA_dikilme"`
+	IHAYonelme     float64 `json:"IHA_yonelme"`
+	IHAYatis       float64 `json:"IHA_yatis"`
+	IHAHiz         float64 `json:"IHA_hiz"`
+	IHABatarya     float64 `json:"IHA_batarya"`
 	IHAOtonom      int     `json:"IHA_otonom"`
 	IHAKilitlenme  int     `json:"IHA_kilitlenme"`
-	HedefMerkezX   int     `json:"Hedef_merkez_X"`
-	HedefMerkezY   int     `json:"Hedef_merkez_Y"`
-	HedefGenislik  int     `json:"Hedef_genislik"`
-	HedefYukseklik int     `json:"Hedef_yukseklik"`
+	HedefMerkezX   float64 `json:"Hedef_merkez_X"`
+	HedefMerkezY   float64 `json:"Hedef_merkez_Y"`
+	HedefGenislik  float64 `json:"Hedef_genislik"`
+	HedefYukseklik float64 `json:"Hedef_yukseklik"`
 	GPSSaati       struct {
 		Saat       int `json:"saat"`
 		Dakika     int `json:"dakika"`
