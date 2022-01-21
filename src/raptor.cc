@@ -41,7 +41,7 @@ void raptor::stop_publish_telemetry() { _publish_telemetry = false; }
 
 std::string raptor::build_telemetry_message() {
   std::stringstream str;
-  str << 0 << " " << position_.lat_deg_ << " " << position_.lon_deg_ << " "
+  str << id_ << " " << position_.lat_deg_ << " " << position_.lon_deg_ << " "
       << position_.rel_alt_ << " " << attitude_.roll_deg_ << " "
       << attitude_.pitch_deg_ << " " << attitude_.yaw_deg_ << " " << speed_m_s_
       << " " << battery_remaning_percent_ << " " << 1 << " " << 0 << " " << 0
