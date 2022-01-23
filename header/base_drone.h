@@ -77,9 +77,6 @@ class base_drone {
   void move(base_move move);
   void move_m(double meter, base_move move);
   void down_m(double meter, base_move move);
-  [[deprecated]] void move_forward(float speed);
-  [[deprecated]] void move_right(float speed);
-  [[deprecated]] void move_down(float speed);
   void set_heading(float dest_heading);
 
  protected:

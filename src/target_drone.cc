@@ -51,7 +51,7 @@ void target_drone::mission_1() {
    * Terminal is waiting user input("q") to terminate program
    * */
   offboard_hover(5);
-  auto speed = 5.0;
+  float speed = 5.0;
   while (1) {
     move_m(40, {.forward = speed});
     std::this_thread::sleep_for(5s);
@@ -87,7 +87,7 @@ void target_drone::mission_2() {
    * Terminal is waiting user input("q") to terminate program
    * */
   offboard_hover(8);
-  auto speed = 5.0;
+  float speed = 5.0;
   while (1) {
     move_m(40, {.forward = speed});
     std::this_thread::sleep_for(10s);
@@ -116,7 +116,7 @@ void target_drone::mission_3() {
    * Terminal is waiting user input("q") to terminate program
    * */
   offboard_hover(12);
-  auto speed = 5.0;
+  float speed = 5.0;
   while (1) {
     move_m(40, {.forward = speed});
     std::this_thread::sleep_for(15s);

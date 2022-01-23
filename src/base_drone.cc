@@ -257,27 +257,6 @@ void base_drone::down_m(double meter, base_move move) {
   this->move({});
 }
 
-void base_drone::move_forward(float speed) {
-  mavsdk::Offboard::VelocityBodyYawspeed msg{};
-  msg.forward_m_s = speed;
-  _mavsdk_offboard->set_velocity_body(msg);
-  previous_move_.forward = speed;
-}
-
-void base_drone::move_right(float speed) {
-  mavsdk::Offboard::VelocityBodyYawspeed msg{};
-  msg.right_m_s = speed;
-  _mavsdk_offboard->set_velocity_body(msg);
-  previous_move_.right = speed;
-}
-
-void base_drone::move_down(float speed) {
-  mavsdk::Offboard::VelocityBodyYawspeed msg{};
-  msg.down_m_s = -speed;
-  _mavsdk_offboard->set_velocity_body(msg);
-  previous_move_.down = speed;
-}
-
 void base_drone::subscribe_heading(double rate_hz) {
   _mavsdk_telemetry->set_rate_position(rate_hz);
   _mavsdk_telemetry->subscribe_heading(
