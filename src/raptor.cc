@@ -41,11 +41,9 @@ void raptor::move2() {
       auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
                                         dest_lat, dest_lon);
 
-      if (std::abs(dest_heading - this->_heading) > 1) {
-        set_heading(dest_heading);
-        using namespace std::chrono_literals;
-        std::this_thread::sleep_for(50ms);
-      }
+      set_heading(dest_heading);
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(50ms);
 
       std::cout << "Haversine: "
                 << util::haversine(position_.lat_deg_, position_.lon_deg_,
