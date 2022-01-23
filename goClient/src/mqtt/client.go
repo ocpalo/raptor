@@ -31,6 +31,17 @@ func (c *Client) TelemetryCallback(client mqtt.Client, msg mqtt.Message) {
 	c.Publish("raptor/telemetry/response", common.BuildTelemetryResponse(&common.TelemResp))
 }
 
+func (c *Client) TargetTelemetryCallback(client mqtt.Client, msg mqtt.Message) {
+	var target common.TelemetryRequest
+	var response common.TelemetryResponse
+	common.BuildTelemetryRequest(&target, string(msg.Payload()))
+	status := post.Post(common.PostSendTelemetry, &target, &response)
+	handled := proxy.HandleStatus(status)
+	if !handled {
+		return
+	}
+}
+
 func (c *Client) LandCallback(client mqtt.Client, msg mqtt.Message) {
 	status := get.Get(common.GetApiLogout, common.LogOut{})
 	if status == common.StatusSuccess {
@@ -44,7 +55,7 @@ func (c *Client) Init(port int, host string) {
 	c.host = host
 	c.port = port
 	opts := mqtt.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:%d", host, port))
-	opts.SetClientID("temp")
+	opts.SetClientID("GO_CLI")
 	c.client = mqtt.NewClient(opts)
 	if token := c.client.Connect(); token.Wait() && token.Error() != nil {
 		panic(token.Error())
@@ -62,11 +73,15 @@ func (c *Client) Subscribe(topic string) {
 			log.Fatalln(token.Error())
 			return
 		}
+	} else if topic == "target/telemetry" {
+		if token := c.client.Subscribe(topic, 1, c.TargetTelemetryCallback); token.Wait() && token.Error() != nil {
+			log.Fatalln(token.Error())
+			return
+		}
 	} else {
 		log.Fatalln("MQTT subscribe invalid topic name")
 		return
 	}
-	c.subscribed_topics = append(c.subscribed_topics, topic)
 }
 
 func (c *Client) Publish(topic, message string) {
