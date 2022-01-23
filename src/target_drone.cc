@@ -42,7 +42,7 @@ void target_drone::mission_1() {
 
   // Move forward 40 meter, 10m/s
   move_m(40, {.forward = 10});
-  std::this_thread::sleep_for(3s);
+  offboard_hover(10);
 
   /*
    * Before starting to fly hover 5 sec
@@ -54,13 +54,13 @@ void target_drone::mission_1() {
   float speed = 5.0;
   while (1) {
     move_m(40, {.forward = speed});
-    std::this_thread::sleep_for(5s);
+    offboard_hover(5);
     move_m(40, {.right = speed});
-    std::this_thread::sleep_for(5s);
+    offboard_hover(5);
     move_m(40, {.forward = -speed});
-    std::this_thread::sleep_for(5s);
+    offboard_hover(5);
     move_m(40, {.right = -speed});
-    std::this_thread::sleep_for(5s);
+    offboard_hover(5);
   }
 }
 
@@ -78,7 +78,7 @@ void target_drone::mission_2() {
 
   // Move forward 40 meter, 10m/s
   move_m(40, {.forward = 10});
-  std::this_thread::sleep_for(3s);
+  offboard_hover(3);
 
   /*
    * Before starting to fly hover 5 sec
@@ -90,9 +90,9 @@ void target_drone::mission_2() {
   float speed = 5.0;
   while (1) {
     move_m(40, {.forward = speed});
-    std::this_thread::sleep_for(10s);
+    offboard_hover(10);
     move_m(40, {.forward = -speed});
-    std::this_thread::sleep_for(10s);
+    offboard_hover(10);
   }
 }
 
@@ -107,7 +107,7 @@ void target_drone::mission_3() {
 
   // Move forward 40 meter, 10m/s
   move_m(40, {.forward = 10});
-  std::this_thread::sleep_for(3s);
+  offboard_hover(3);
 
   /*
    * Before starting to fly hover 5 sec
@@ -119,13 +119,13 @@ void target_drone::mission_3() {
   float speed = 5.0;
   while (1) {
     move_m(40, {.forward = speed});
-    std::this_thread::sleep_for(15s);
+    offboard_hover(15);
     move_m(40, {.forward = -speed});
-    std::this_thread::sleep_for(15s);
+    offboard_hover(15);
     move_m(40, {.right = speed});
-    std::this_thread::sleep_for(5s);
+    offboard_hover(15);
     move_m(40, {.right = -speed});
-    std::this_thread::sleep_for(5s);
+    offboard_hover(15);
   }
 }
 
