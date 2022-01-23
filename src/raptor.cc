@@ -27,12 +27,14 @@ bool raptor::move2(float heading) {
 
 void raptor::land() {
   base_drone::land();
-  _climqtt.publish(drone::mqtt::LAND_TOPIC, std::move(std::to_string(id_)));
+  _climqtt.publish(drone::mqtt::topics::LAND_TOPIC,
+                   std::move(std::to_string(id_)));
 }
 
 void raptor::publish_telemetry() {
   while (_publish_telemetry) {
-    _climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, build_telemetry_message());
+    _climqtt.publish(drone::mqtt::topics::TELEMETRY_TOPIC,
+                     build_telemetry_message());
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
   }
 }

@@ -1,9 +1,10 @@
+#include "target_drone.h"
+
 #include <chrono>
 #include <string>
 #include <thread>
 
 #include "base_drone.h"
-#include "target_drone.h"
 
 /*
  *
@@ -162,7 +163,8 @@ void target_drone::set_id(int id) { id_ = id; }
 
 void target_drone::publish_telemetry() {
   while (_publish_telemetry) {
-    _climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, build_telemetry_message());
+    _climqtt.publish(drone::mqtt::topics::TELEMETRY_TOPIC,
+                     build_telemetry_message());
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
   }
 }
