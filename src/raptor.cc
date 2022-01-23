@@ -25,12 +25,6 @@ bool raptor::move2(float heading) {
   return true;
 }
 
-void raptor::land() {
-  base_drone::land();
-  _climqtt.publish(drone::mqtt::topics::LAND_TOPIC,
-                   std::move(std::to_string(id_)));
-}
-
 void raptor::publish_telemetry() {
   while (_publish_telemetry) {
     _climqtt.publish(drone::mqtt::topics::TELEMETRY_TOPIC,
@@ -40,6 +34,13 @@ void raptor::publish_telemetry() {
 }
 
 void raptor::stop_publish_telemetry() { _publish_telemetry = false; }
+
+mavsdk::Action::Result raptor::do_land() {
+  _climqtt.publish(drone::mqtt::topics::LAND_TOPIC,
+                   std::move(std::to_string(id_)));
+  auto resp = base_drone::do_land();
+  return resp;
+}
 
 std::string raptor::build_telemetry_message() {
   std::stringstream str;

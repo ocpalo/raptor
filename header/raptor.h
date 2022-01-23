@@ -16,9 +16,11 @@ class raptor final : public base_drone {
   ~raptor() = default;
 
   bool move2(float heading);
-  void land();
   void publish_telemetry();
   void stop_publish_telemetry();
+
+ protected:
+  mavsdk::Action::Result do_land() override;
 
  private:
   std::string build_telemetry_message();

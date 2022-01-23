@@ -80,6 +80,18 @@ class base_drone {
   void set_heading(float dest_heading);
 
  protected:
+  virtual mavsdk::Action::Result do_arm();
+  virtual mavsdk::Action::Result do_takeoff(std::optional<float> altitude = {});
+  virtual mavsdk::Action::Result do_land();
+  virtual mavsdk::Offboard::Result do_hold();
+  virtual mavsdk::Offboard::Result do_offboard_init();
+  virtual void do_offboard_hover(int seconds);
+  virtual void do_move(base_move move);
+  virtual void do_move_m(double meter, base_move move);
+  virtual void do_down_m(double meter, base_move move);
+  virtual void do_set_heading(float dest_heading);
+
+ protected:
   void subscribe_heading(double rate_hz);
   void unsubscribe_heading();
 };

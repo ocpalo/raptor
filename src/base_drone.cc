@@ -111,16 +111,50 @@ void base_drone::set_telemetry_subscriptions(double hz) {
 }
 
 mavsdk::Action::Result base_drone::arm() {
+  debug_print("Set: Arm");
+  auto result = do_arm();
+  debug_print("Armed");
+  return result;
+}
+
+mavsdk::Action::Result base_drone::takeoff(std::optional<float> altitude) {
+  return do_takeoff(altitude);
+}
+
+mavsdk::Action::Result base_drone::land() { return do_land(); }
+
+mavsdk::Offboard::Result base_drone::hold() { return do_hold(); };
+
+mavsdk::Offboard::Result base_drone::offboard_init() {
+  return do_offboard_init();
+}
+
+void base_drone::offboard_hover(int seconds) { do_offboard_hover(seconds); }
+
+void base_drone::move(base_move move) { do_move(std::move(move)); }
+
+void base_drone::move_m(double meter, base_move move) {
+  do_move_m(meter, std::move(move));
+}
+
+void base_drone::down_m(double meter, base_move move) {
+  do_down_m(meter, std::move(move));
+}
+
+void base_drone::set_heading(float dest_heading) {
+  do_set_heading(dest_heading);
+}
+
+mavsdk::Action::Result base_drone::do_arm() {
   if (const auto arm_result = _mavsdk_action->arm();
       arm_result != mavsdk::Action::Result::Success) {
     throw std::runtime_error("Arming failed, Action::Result: " +
                              static_cast<int>(arm_result));
   }
-  debug_print("Armed");
   return mavsdk::Action::Result::Success;
 }
 
-mavsdk::Action::Result base_drone::takeoff(std::optional<float> altitude) {
+mavsdk::Action::Result base_drone::do_takeoff(std::optional<float> altitude) {
   if (altitude.has_value()) {
     auto value = altitude.value();
     _mavsdk_action->set_takeoff_altitude(value);
@@ -152,7 +186,7 @@ mavsdk::Action::Result base_drone::takeoff(std::optional<float> altitude) {
   return mavsdk::Action::Result::Success;
 }
 
-mavsdk::Action::Result base_drone::land() {
+mavsdk::Action::Result base_drone::do_land() {
   if (const auto land_result = _mavsdk_action->land();
       land_result != mavsdk::Action::Result::Success) {
     debug_print("Landing failed, Action::Result: ",
@@ -169,7 +203,7 @@ mavsdk::Action::Result base_drone::land() {
   return mavsdk::Action::Result::Success;
 }
 
-mavsdk::Offboard::Result base_drone::offboard_init() {
+mavsdk::Offboard::Result base_drone::do_offboard_init() {
   debug_print("Starting Offboard velocity control in body coordinates");
 
   mavsdk::Offboard::VelocityBodyYawspeed stay{};
@@ -188,7 +222,7 @@ mavsdk::Offboard::Result base_drone::offboard_init() {
 }
 
 // Need to call offboard_init to switch offboard mode
-mavsdk::Offboard::Result base_drone::hold() {
+mavsdk::Offboard::Result base_drone::do_hold() {
   debug_print("Offboard control stopped");
   this->offboard_ = false;
   return _mavsdk_offboard->stop();
@@ -196,7 +230,7 @@ mavsdk::Offboard::Result base_drone::hold() {
 
 // TODO:: implement this using promise or something while waiting data from
 // server
-void base_drone::offboard_hover(int sec) {
+void base_drone::do_offboard_hover(int sec) {
   debug_print("Hovering...");
   mavsdk::Offboard::VelocityBodyYawspeed stay{};
   _mavsdk_offboard->set_velocity_body(stay);
@@ -204,7 +238,7 @@ void base_drone::offboard_hover(int sec) {
   std::this_thread::sleep_for(std::chrono::seconds(sec));
 }
 
-void base_drone::move(base_move move) {
+void base_drone::do_move(base_move move) {
   mavsdk::Offboard::VelocityBodyYawspeed msg{};
   auto downSpeed = position_.rel_alt_ < 3 ? 0 : move.down;
 
@@ -216,7 +250,7 @@ void base_drone::move(base_move move) {
   previous_move_ = move;
 }
 
-void base_drone::move_m(double meter, base_move move) {
+void base_drone::do_move_m(double meter, base_move move) {
   base_position prev = position_;
   while (util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_,
                          position_.lon_deg_) +
@@ -234,7 +268,7 @@ void base_drone::move_m(double meter, base_move move) {
 }
 
 // Improvements needed
-void base_drone::down_m(double meter, base_move move) {
+void base_drone::do_down_m(double meter, base_move move) {
   move.down = move.down == 0 ? 3 : move.down;
   auto current_altitude = position_.rel_alt_;
 
@@ -257,6 +291,16 @@ void base_drone::down_m(double meter, base_move move) {
   this->move({});
 }
 
+void base_drone::do_set_heading(float dest_heading) {
+  auto yaw_rate = (dest_heading - _heading) / 3;
+
+  mavsdk::Offboard::VelocityBodyYawspeed msg{};
+  msg.yawspeed_deg_s = yaw_rate;
+  msg.forward_m_s = previous_move_.forward;
+  msg.right_m_s = previous_move_.right;
+  _mavsdk_offboard->set_velocity_body(msg);
+}
+
 void base_drone::subscribe_heading(double rate_hz) {
   _mavsdk_telemetry->set_rate_position(rate_hz);
   _mavsdk_telemetry->subscribe_heading(
@@ -270,16 +314,6 @@ void base_drone::subscribe_heading(double rate_hz) {
 void base_drone::unsubscribe_heading() {
   _mavsdk_telemetry->subscribe_heading(nullptr);
   debug_print("Unsubscribed heading");
-}
-
-void base_drone::set_heading(float dest_heading) {
-  auto yaw_rate = (dest_heading - _heading) / 3;
-
-  mavsdk::Offboard::VelocityBodyYawspeed msg{};
-  msg.yawspeed_deg_s = yaw_rate;
-  msg.forward_m_s = previous_move_.forward;
-  msg.right_m_s = previous_move_.right;
-  _mavsdk_offboard->set_velocity_body(msg);
 }
 
 std::ostream& operator<<(std::ostream& stream,
