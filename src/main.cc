@@ -6,9 +6,9 @@
 #include "mqtt.h"
 #include "raptor.h"
 
-void usage(const std::string &bin_name) {
+void usage(const std::string& bin_name) {
   std::cerr
-      << "Usage : " << bin_name << " <connection_url>\n"
+      << "Usage : " << bin_name << " <connection_url> <1 || 2 || 3>\n"
       << "Connection URL format should be :\n"
       << " For TCP : tcp://[server_host][:server_port]\n"
       << " For UDP : udp://[bind_host][:bind_port]\n"
