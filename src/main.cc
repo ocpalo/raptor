@@ -5,6 +5,7 @@
 
 #include "mqtt.h"
 #include "raptor.h"
+#include "test_drone.h"
 
 void usage(const std::string& bin_name) {
   std::cerr
@@ -16,16 +17,35 @@ void usage(const std::string& bin_name) {
       << "For example, to connect to the simulator use URL: udp://:14540\n";
 }
 
-int main(int argc, char **argv) {
-  drone::raptor raptor(argv[1]);
-  raptor.arm();
-  raptor.takeoff();
-  raptor.offboard_init();
-  auto fut = std::async(std::launch::async, &drone::raptor::publish_telemetry,
-                        &raptor);
-  raptor.move_m(10, {.forward = 3});
-  raptor.move_m(10, {.right = 3});
-  raptor.stop_publish_telemetry();
-  raptor.land();
+int main(int argc, char** argv) {
+  if (!(argc != 4 || argc != 2)) {
+    usage(argv[0]);
+    return 1;
+  }
+
+  if (argc == 4) {
+    drone::test_drone b(argv[1], std::stoi(argv[2]), std::stoi(argv[2]));
+    try {
+      b.arm();
+      b.takeoff(5);
+      b.offboard_init();
+      b.run(argv[2]);
+    } catch (std::runtime_error& ex) {
+      debug_print("Land mode actived, runtime_error:");
+      debug_print(ex.what());
+      b.land();
+    }
+  } else {
+    drone::raptor raptor(argv[1]);
+    raptor.arm();
+    raptor.takeoff();
+    raptor.offboard_init();
+    auto fut = std::async(std::launch::async, &drone::raptor::publish_telemetry,
+                          &raptor);
+    raptor.move_m(10, {.forward = 3});
+    raptor.move_m(10, {.right = 3});
+    raptor.stop_publish_telemetry();
+    raptor.land();
+  }
   return 0;
 }
