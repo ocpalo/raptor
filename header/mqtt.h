@@ -16,6 +16,7 @@ namespace topics {
 constexpr auto TELEMETRY_TOPIC{"raptor/telemetry"};
 constexpr auto TELEMETRY_RESPONSE_TOPIC{"raptor/telemetry/response"};
 constexpr auto LAND_TOPIC{"raptor/land"};
+constexpr auto TARGET_TELEMETRY_TOPIC{"target/telemetry"};
 }  // namespace topics
 
 constexpr auto MQTT_QOS{0};

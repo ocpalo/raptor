@@ -133,23 +133,22 @@ void target_drone::run(char* argv) {
   auto fut = std::async(std::launch::async,
                         &drone::target_drone::publish_telemetry, this);
   using namespace std::chrono_literals;
-  std::thread thr;
+  std::jthread thr;
   switch (*argv) {
     case '1':
-      thr = std::thread(&target_drone::mission_1, this);
+      thr = std::jthread(&target_drone::mission_1, this);
       break;
     case '2':
-      thr = std::thread(&target_drone::mission_2, this);
+      thr = std::jthread(&target_drone::mission_2, this);
       break;
     case '3':
-      thr = std::thread(&target_drone::mission_3, this);
+      thr = std::jthread(&target_drone::mission_3, this);
       break;
 
     default:
       break;
   }
 
-  thr.detach();
   char c = '0';
   while (c != 'q') {
     std::cin >> c;
@@ -163,7 +162,7 @@ void target_drone::set_id(int id) { id_ = id; }
 
 void target_drone::publish_telemetry() {
   while (_publish_telemetry) {
-    _climqtt.publish(drone::mqtt::topics::TELEMETRY_TOPIC,
+    _climqtt.publish(drone::mqtt::topics::TARGET_TELEMETRY_TOPIC,
                      build_telemetry_message());
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
   }

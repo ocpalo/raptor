@@ -23,13 +23,7 @@ void raptor::move2() {
       move({.forward = 3});
       auto msg = opt_msg.value();
 
-      std::vector<std::string> out;
-      const char* delim = ",";
-      char* token = strtok(const_cast<char*>(msg.second.c_str()), delim);
-      while (token != nullptr) {
-        out.push_back(std::string(token));
-        token = strtok(nullptr, delim);
-      }
+      auto out = util::split(msg.second, ',');
 
       std::cout << "TeamId, Dest Lat-Lon: " << std::stoi(out[4]) << " "
                 << std::stod(out[5]) << " " << std::stod(out[6]) << "\n";
@@ -46,7 +40,7 @@ void raptor::move2() {
       auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
                                         dest_lat, dest_lon);
 
-      if (std::abs(dest_heading - this->_heading) > 3) {
+      if (std::abs(dest_heading - this->_heading) > 1) {
         set_heading(dest_heading);
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(1s);
