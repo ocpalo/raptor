@@ -27,7 +27,7 @@ bool raptor::move2(float heading) {
 
 void raptor::land() {
   base_drone::land();
-  _climqtt.publish(drone::mqtt::LAND_TOPIC, "1");
+  _climqtt.publish(drone::mqtt::LAND_TOPIC, std::move(std::to_string(id_)));
 }
 
 void raptor::publish_telemetry() {

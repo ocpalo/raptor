@@ -1,5 +1,6 @@
 #include "mqtt.h"
 
+#include <chrono>
 #include <optional>
 #include <string>
 #include <utility>
@@ -32,8 +33,10 @@ void client_mqtt::publish(std::string const& topic, std::string const& msg) {
 }
 
 std::optional<std::pair<std::string, std::string>> client_mqtt::consume() {
-  auto msg = this->client_.consume_message();
-  if (msg) {
+  ::mqtt::const_message_ptr msg;
+  auto received = this->client_.try_consume_message_for(
+      &msg, std::chrono::milliseconds(500));
+  if (received) {
     return std::make_pair(msg->get_topic(), msg->to_string());
   } else
     return std::nullopt;
