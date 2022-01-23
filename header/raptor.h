@@ -6,8 +6,8 @@
 
 namespace drone {
 
-class raptor : public base_drone {
-  int id_;
+class raptor final : public base_drone {
+  int id_ = 0;
   std::atomic<bool> _publish_telemetry = true;
   drone::mqtt::client_mqtt _climqtt;
 

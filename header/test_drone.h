@@ -1,5 +1,5 @@
-#include <string>
 #include <atomic>
+#include <string>
 
 #include "base_drone.h"
 #include "mqtt.h"
@@ -7,7 +7,7 @@
 namespace drone {
 int constexpr mock_drone_initial_heading[] = {120, 240, 360};
 
-class test_drone : public base_drone {
+class test_drone final : public base_drone {
   int initialHeading;
   int id_;
   std::atomic<bool> _publish_telemetry = true;
