@@ -240,11 +240,10 @@ void base_drone::do_offboard_hover(int sec) {
 
 void base_drone::do_move(base_move move) {
   mavsdk::Offboard::VelocityBodyYawspeed msg{};
-  auto downSpeed = position_.rel_alt_ < 3 ? 0 : move.down;
 
   msg.forward_m_s = move.forward;
   msg.right_m_s = move.right;
-  msg.down_m_s = downSpeed;
+  msg.down_m_s = move.down;
   msg.yawspeed_deg_s = move.yaw;
   _mavsdk_offboard->set_velocity_body(msg);
   previous_move_ = move;
@@ -296,6 +295,7 @@ void base_drone::do_set_heading(float dest_heading) {
   msg.yawspeed_deg_s = yaw_rate;
   msg.forward_m_s = previous_move_.forward;
   msg.right_m_s = previous_move_.right;
+  msg.down_m_s = previous_move_.down;
   _mavsdk_offboard->set_velocity_body(msg);
 }
 

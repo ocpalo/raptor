@@ -21,10 +21,9 @@ void raptor::move2() {
   while (true) {
     auto opt_msg = _climqtt.consume();
     if (opt_msg.has_value()) {
-      move({.forward = 3});
       auto msg = opt_msg.value();
-
       auto out = util::split(msg.second, ',');
+      move({.forward = 5, .down = (position_.rel_alt_ - std::stof(out[7]))});
 
       std::cout << "TeamId, Dest Lat-Lon: " << std::stoi(out[4]) << " "
                 << std::stod(out[5]) << " " << std::stod(out[6]) << "\n";
