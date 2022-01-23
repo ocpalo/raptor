@@ -15,7 +15,7 @@ class raptor final : public base_drone {
   raptor(std::string const& connection_url);
   ~raptor() = default;
 
-  bool move2(float heading);
+  void move2();
   void publish_telemetry();
   void stop_publish_telemetry();
 

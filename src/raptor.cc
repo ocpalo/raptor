@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "base_drone.h"
+#include "util.h"
 
 namespace drone {
 
@@ -14,15 +15,57 @@ raptor::raptor(std::string const& conn_url)
   _climqtt.connect();
 }
 
-bool raptor::move2(float heading) {
-  if (std::abs(heading - this->_heading) > 3) {
-    move({.forward = 3});
-    set_heading(heading);
-    using namespace std::chrono_literals;
-    std::this_thread::sleep_for(1s);
-    return false;
+void raptor::move2() {
+  _climqtt.subscribe(drone::mqtt::topics::TELEMETRY_RESPONSE_TOPIC);
+  while (true) {
+    auto opt_msg = _climqtt.consume();
+    if (opt_msg.has_value()) {
+      move({.forward = 3});
+      auto msg = opt_msg.value();
+
+      std::vector<std::string> out;
+      const char* delim = ",";
+      char* token = strtok(const_cast<char*>(msg.second.c_str()), delim);
+      while (token != nullptr) {
+        out.push_back(std::string(token));
+        token = strtok(nullptr, delim);
+      }
+
+      std::cout << "TeamId, Dest Lat-Lon: " << std::stoi(out[4]) << " "
+                << std::stod(out[5]) << " " << std::stod(out[6]) << "\n";
+      // dest lat-long
+      double dest_lat = std::stod(out[5]);
+      double dest_lon = std::stod(out[6]);
+
+      if (std::stoi(out[4]) == id_) continue;
+
+      std::cout << "Bearing :"
+                << util::bearing(position_.lat_deg_, position_.lon_deg_,
+                                 dest_lat, dest_lon)
+                << "\n";
+      auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
+                                        dest_lat, dest_lon);
+
+      if (std::abs(dest_heading - this->_heading) > 3) {
+        set_heading(dest_heading);
+        using namespace std::chrono_literals;
+        std::this_thread::sleep_for(1s);
+      }
+
+      std::cout << "Haversine: "
+                << util::haversine(position_.lat_deg_, position_.lon_deg_,
+                                   dest_lat, dest_lon)
+                << "\n";
+      /*if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
+                          dest_lon) < 10) {
+        move({});
+        break;
+      }*/
+    } else {
+      using namespace std::chrono_literals;
+      std::this_thread::sleep_for(500ms);
+    }
   }
-  return true;
 }
 
 void raptor::publish_telemetry() {

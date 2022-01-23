@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     raptor.offboard_init();
     auto fut = std::async(std::launch::async, &drone::raptor::publish_telemetry,
                           &raptor);
-    raptor.move_m(10, {.forward = 3});
+    raptor.move2();
     raptor.stop_publish_telemetry();
     raptor.land();
   }
