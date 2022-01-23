@@ -262,7 +262,6 @@ void base_drone::do_move_m(double meter, base_move move) {
               << "Battery: " << battery_remaning_percent_
               << " offboard:" << offboard_ << " Speed:" << speed_m_s_
               << " Heading:" << _heading << "\n";
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
   this->move({});
 }
@@ -284,7 +283,6 @@ void base_drone::do_down_m(double meter, base_move move) {
     _mavsdk_offboard->set_velocity_body(msg);
 
     previous_move_ = move;
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     distance_covered += std::abs(position_.rel_alt_ - current_altitude);
   }
 

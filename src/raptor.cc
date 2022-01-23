@@ -17,6 +17,7 @@ raptor::raptor(std::string const& conn_url)
 
 void raptor::move2() {
   _climqtt.subscribe(drone::mqtt::topics::TELEMETRY_RESPONSE_TOPIC);
+  int targetCount = 2;
   while (true) {
     auto opt_msg = _climqtt.consume();
     if (opt_msg.has_value()) {
@@ -43,22 +44,26 @@ void raptor::move2() {
       if (std::abs(dest_heading - this->_heading) > 1) {
         set_heading(dest_heading);
         using namespace std::chrono_literals;
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(50ms);
       }
 
       std::cout << "Haversine: "
                 << util::haversine(position_.lat_deg_, position_.lon_deg_,
                                    dest_lat, dest_lon)
                 << "\n";
-      /*if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
-                          dest_lon) < 10) {
+      if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
+                          dest_lon) < 5) {
         move({});
-        break;
-      }*/
+        _climqtt.publish(mqtt::topics::LOCK, out[4]);
+        targetCount--;
+      }
     } else {
+      std::cout << "No value\n";
       using namespace std::chrono_literals;
-      std::this_thread::sleep_for(500ms);
+      std::this_thread::sleep_for(50ms);
     }
+
+    if (!targetCount) break;
   }
 }
 
@@ -66,7 +71,7 @@ void raptor::publish_telemetry() {
   while (_publish_telemetry) {
     _climqtt.publish(drone::mqtt::topics::TELEMETRY_TOPIC,
                      build_telemetry_message());
-    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    std::this_thread::sleep_for(std::chrono::milliseconds(90));
   }
 }
 
