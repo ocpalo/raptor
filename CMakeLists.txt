@@ -24,7 +24,7 @@ add_executable(main
     src/base_drone.cc
     src/raptor.cc
     src/util.cc
-    src/test_drone.cc
+    src/target_drone.cc
     src/mqtt.cc
     # ... any other source files
 )

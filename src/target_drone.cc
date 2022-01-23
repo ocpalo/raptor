@@ -1,10 +1,9 @@
-#include "test_drone.h"
-
 #include <chrono>
 #include <string>
 #include <thread>
 
 #include "base_drone.h"
+#include "target_drone.h"
 
 /*
  *
@@ -18,19 +17,20 @@
  * |     td2              td3    |
  *  -----------------------------
  *
- *  td = test_drone
+ *  td = target_drone
  */
 
 namespace drone {
 
-test_drone::test_drone(std::string const& conn_url, int mission, int id)
+target_drone::target_drone(std::string const& conn_url, int mission, int id)
     : base_drone(conn_url),
       initialHeading(mock_drone_initial_heading[mission - 1]),
-      id_(id), _climqtt(drone::SERVER_ADDRESS, std::to_string(id_)) {
-        _climqtt.connect();
-      }
+      id_(id),
+      _climqtt(drone::SERVER_ADDRESS, std::to_string(id_)) {
+  _climqtt.connect();
+}
 
-void test_drone::mission_1() {
+void target_drone::mission_1() {
   debug_print(".**************MISSION 1 started**************");
   using namespace std::chrono_literals;
 
@@ -66,7 +66,7 @@ void test_drone::mission_1() {
 // TODO:: Implement these missions, maybe find a better way to approach this
 // problem
 //        Factory design pattern?
-void test_drone::mission_2() {
+void target_drone::mission_2() {
   debug_print(".**************MISSION 2 started**************");
   using namespace std::chrono_literals;
 
@@ -95,7 +95,7 @@ void test_drone::mission_2() {
   }
 }
 
-void test_drone::mission_3() {
+void target_drone::mission_3() {
   debug_print(".**************MISSION 3 started**************");
   using namespace std::chrono_literals;
 
@@ -128,20 +128,20 @@ void test_drone::mission_3() {
   }
 }
 
-void test_drone::run(char* argv) {
-  auto fut = std::async(std::launch::async, &drone::test_drone::publish_telemetry,
-                        this);
+void target_drone::run(char* argv) {
+  auto fut = std::async(std::launch::async,
+                        &drone::target_drone::publish_telemetry, this);
   using namespace std::chrono_literals;
   std::thread thr;
   switch (*argv) {
     case '1':
-      thr = std::thread(&test_drone::mission_1, this);
+      thr = std::thread(&target_drone::mission_1, this);
       break;
     case '2':
-      thr = std::thread(&test_drone::mission_2, this);
+      thr = std::thread(&target_drone::mission_2, this);
       break;
     case '3':
-      thr = std::thread(&test_drone::mission_3, this);
+      thr = std::thread(&target_drone::mission_3, this);
       break;
 
     default:
@@ -158,21 +158,17 @@ void test_drone::run(char* argv) {
   stop_publish_telemetry();
 }
 
-void test_drone::set_id(int id) {
-  id_ = id;
-}
+void target_drone::set_id(int id) { id_ = id; }
 
-void test_drone::publish_telemetry(){
+void target_drone::publish_telemetry() {
   while (_publish_telemetry) {
     _climqtt.publish(drone::mqtt::TELEMETRY_TOPIC, build_telemetry_message());
     std::this_thread::sleep_for(std::chrono::milliseconds(800));
   }
 }
-void test_drone::stop_publish_telemetry(){
-  _publish_telemetry = false;
-}
+void target_drone::stop_publish_telemetry() { _publish_telemetry = false; }
 
-std::string test_drone::build_telemetry_message() {
+std::string target_drone::build_telemetry_message() {
   std::stringstream str;
   str << id_ << " " << position_.lat_deg_ << " " << position_.lon_deg_ << " "
       << position_.rel_alt_ << " " << attitude_.roll_deg_ << " "

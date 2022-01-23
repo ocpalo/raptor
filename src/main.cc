@@ -5,7 +5,7 @@
 
 #include "mqtt.h"
 #include "raptor.h"
-#include "test_drone.h"
+#include "target_drone.h"
 
 void usage(const std::string& bin_name) {
   std::cerr
@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   }
 
   if (argc == 4) {
-    drone::test_drone b(argv[1], std::stoi(argv[2]), std::stoi(argv[2]));
+    drone::target_drone b(argv[1], std::stoi(argv[2]), std::stoi(argv[2]));
     try {
       b.arm();
       b.takeoff(5);
