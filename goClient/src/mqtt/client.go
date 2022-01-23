@@ -3,6 +3,7 @@ package client
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"uav_client/src/common"
 	"uav_client/src/http/get"
 	"uav_client/src/http/post"
@@ -51,6 +52,10 @@ func (c *Client) LandCallback(client mqtt.Client, msg mqtt.Message) {
 	forceLogout()
 }
 
+func (c *Client) LockCallback(client mqtt.Client, msg mqtt.Message) {
+	common.LockedIndex, _ = strconv.Atoi(string(msg.Payload()))
+}
+
 func (c *Client) Init(port int, host string) {
 	c.host = host
 	c.port = port
@@ -70,6 +75,11 @@ func (c *Client) Subscribe(topic string) {
 		}
 	} else if topic == "raptor/land" {
 		if token := c.client.Subscribe(topic, 1, c.LandCallback); token.Wait() && token.Error() != nil {
+			log.Fatalln(token.Error())
+			return
+		}
+	} else if topic == "raptor/lock" {
+		if token := c.client.Subscribe(topic, 1, c.LockCallback); token.Wait() && token.Error() != nil {
 			log.Fatalln(token.Error())
 			return
 		}

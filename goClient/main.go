@@ -31,6 +31,7 @@ func main() {
 	scheduler.Every(3).Second().Do(proxy.Task)
 	cli.Subscribe("raptor/telemetry")
 	cli.Subscribe("raptor/land")
+	cli.Subscribe("raptor/lock")
 	cli.Subscribe("target/telemetry")
 
 	scheduler.StartAsync()
