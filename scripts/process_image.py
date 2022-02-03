@@ -9,7 +9,7 @@ im_topic = "im/coord"
 
 class ProcessImage:
   def __init__(self, mqtt_client):
-    self.mqtt_cli = uav_mqtt(mqtt_client)
+    self.mqtt_cli = mqtt_client
     self.process_image = False
     self.land = False
     self.logger = logging.getLogger("image")
@@ -34,7 +34,8 @@ class ProcessImage:
   def cleanup(self):
     if self.cap.isOpened():
       self.cap.release()
-      self.logger.info("{} | Video capture released",format(datetime.now()))
+      self.video_writer.release()
+      self.logger.info("{} | Video capture and video writer released".format(datetime.now()))
 
   # TODO this function should return x,y message
   def process(self):

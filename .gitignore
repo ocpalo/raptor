@@ -1,2 +1,5 @@
 build/
 .vscode/
+
+scripts/__pycache__/
+scripts/*.log

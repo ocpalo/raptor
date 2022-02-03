@@ -6,7 +6,7 @@ import cv2
 if __name__ == '__main__':
   client = uav_mqtt('localhost', 1883, "raptor")
   client.publish("msg","msg")
-  process_image = ProcessImage()
+  process_image = ProcessImage(client)
   client.subscribe("raptor/land", process_image.landCallback)
   client.subscribe("raptor/processImage", process_image.processImageCallback)
   process_image.process()
