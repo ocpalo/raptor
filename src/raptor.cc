@@ -55,7 +55,6 @@ void raptor::move2() {
               .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
               .yaw = dest_heading - _heading});
         using namespace std::chrono_literals;
-        std::this_thread::sleep_for(10ms);
       }
     } else {
       using namespace std::chrono_literals;

@@ -39,6 +39,7 @@ int main(int argc, char** argv) {
     drone::raptor raptor(argv[1]);
     raptor.arm();
     raptor.takeoff();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
     raptor.offboard_init();
     auto fut = std::async(std::launch::async, &drone::raptor::publish_telemetry,
                           &raptor);
