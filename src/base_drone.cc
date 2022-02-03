@@ -284,7 +284,7 @@ void base_drone::do_down_m(double meter, base_move move) {
 }
 
 void base_drone::do_set_heading(float dest_heading) {
-  auto yaw_rate = (dest_heading - _heading) / 3;
+  auto yaw_rate = dest_heading - _heading;
 
   mavsdk::Offboard::VelocityBodyYawspeed msg{};
   msg.yawspeed_deg_s = yaw_rate;

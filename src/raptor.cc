@@ -34,28 +34,20 @@ void raptor::move2() {
     if (opt_msg.has_value()) {
       auto msg = opt_msg.value();
       auto out = util::split(msg.second, ',');
-      move(
-          {.forward = 5, .down = (position_.rel_alt_ - std::stof(out[7]) - 2)});
 
       double dest_lat = std::stod(out[5]);
       double dest_lon = std::stod(out[6]);
 
       if (std::stoi(out[4]) == id_) continue;
 
-      debug_print("Bearing :",
-                  util::bearing(position_.lat_deg_, position_.lon_deg_,
-                                dest_lat, dest_lon));
-
       auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
                                         dest_lat, dest_lon);
 
-      set_heading(dest_heading);
+      move({.forward = 5,
+            .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
+            .yaw = dest_heading - _heading});
       using namespace std::chrono_literals;
       std::this_thread::sleep_for(50ms);
-
-      debug_print("Haversine: ",
-                  util::haversine(position_.lat_deg_, position_.lon_deg_,
-                                  dest_lat, dest_lon));
       /*
       if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
                           dest_lon) < 5) {
