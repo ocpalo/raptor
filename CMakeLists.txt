@@ -26,6 +26,7 @@ add_executable(main
     src/util.cc
     src/target_drone.cc
     src/mqtt.cc
+    src/timer.cc
     # ... any other source files
 )
 
