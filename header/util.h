@@ -1,3 +1,6 @@
+#ifndef UTIL_H
+#define UTIL_H
+
 #include <cmath>
 #include <numbers>
 #include <string>
@@ -49,3 +52,5 @@ T bearing(T lat1, T lon1, T lat2, T lon2) {
 }
 std::vector<std::string> split(std::string const& line, char delimiter);
 }  // namespace util
+
+#endif

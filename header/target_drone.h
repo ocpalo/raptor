@@ -1,3 +1,6 @@
+#ifndef TARGET_DRONE_H
+#define TARGET_DRONE_H
+
 #include <atomic>
 #include <string>
 
@@ -28,3 +31,5 @@ class target_drone final : public base_drone {
   void run(char* argv);
 };
 }  // namespace drone
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef RAPTOR_H
+#define RAPTOR
+
 #include <mavsdk/plugins/gimbal/gimbal.h>
 
 #include <atomic>
@@ -29,3 +32,5 @@ class raptor final : public base_drone {
   std::string build_telemetry_message();
 };
 }  // namespace drone
+
+#endif
