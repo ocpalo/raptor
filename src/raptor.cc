@@ -12,6 +12,17 @@ namespace drone {
 
 raptor::raptor(std::string const& conn_url)
     : base_drone(conn_url), _climqtt(drone::SERVER_ADDRESS, drone::CLIENT_ID) {
+  _gimbal.reset(new mavsdk::Gimbal{_mavsdk_system});
+
+  mavsdk::Gimbal::Result gimbal_result =
+      _gimbal->take_control(mavsdk::Gimbal::ControlMode::Primary);
+  if (gimbal_result != mavsdk::Gimbal::Result::Success) {
+    std::cerr << "Could not take gimbal control: " << gimbal_result << '\n';
+  } else {
+    _gimbal->set_pitch_and_yaw(-30.0f, 0.0f);
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+  }
+
   _climqtt.connect();
 }
 
@@ -23,20 +34,18 @@ void raptor::move2() {
     if (opt_msg.has_value()) {
       auto msg = opt_msg.value();
       auto out = util::split(msg.second, ',');
-      move({.forward = 5, .down = (position_.rel_alt_ - std::stof(out[7]))});
+      move(
+          {.forward = 5, .down = (position_.rel_alt_ - std::stof(out[7]) - 2)});
 
-      std::cout << "TeamId, Dest Lat-Lon: " << std::stoi(out[4]) << " "
-                << std::stod(out[5]) << " " << std::stod(out[6]) << "\n";
-      // dest lat-long
       double dest_lat = std::stod(out[5]);
       double dest_lon = std::stod(out[6]);
 
       if (std::stoi(out[4]) == id_) continue;
 
-      std::cout << "Bearing :"
-                << util::bearing(position_.lat_deg_, position_.lon_deg_,
-                                 dest_lat, dest_lon)
-                << "\n";
+      debug_print("Bearing :",
+                  util::bearing(position_.lat_deg_, position_.lon_deg_,
+                                dest_lat, dest_lon));
+
       auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
                                         dest_lat, dest_lon);
 
@@ -44,18 +53,18 @@ void raptor::move2() {
       using namespace std::chrono_literals;
       std::this_thread::sleep_for(50ms);
 
-      std::cout << "Haversine: "
-                << util::haversine(position_.lat_deg_, position_.lon_deg_,
-                                   dest_lat, dest_lon)
-                << "\n";
+      debug_print("Haversine: ",
+                  util::haversine(position_.lat_deg_, position_.lon_deg_,
+                                  dest_lat, dest_lon));
+      /*
       if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
                           dest_lon) < 5) {
         move({});
         _climqtt.publish(mqtt::topics::LOCK, out[4]);
         targetCount--;
       }
+      */
     } else {
-      std::cout << "No value\n";
       using namespace std::chrono_literals;
       std::this_thread::sleep_for(50ms);
     }

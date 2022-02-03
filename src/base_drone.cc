@@ -256,11 +256,6 @@ void base_drone::do_move_m(double meter, base_move move) {
              0.5 <
          meter) {
     this->move(move);
-    // TODO:: for debugging, remove in the future
-    std::cout << position_ << previous_move_ << attitude_
-              << "Battery: " << battery_remaning_percent_
-              << " offboard:" << offboard_ << " Speed:" << speed_m_s_
-              << " Heading:" << _heading << "\n";
   }
   this->move({});
 }

@@ -1,3 +1,5 @@
+#include <mavsdk/plugins/gimbal/gimbal.h>
+
 #include <atomic>
 #include <string>
 
@@ -10,6 +12,7 @@ class raptor final : public base_drone {
   int id_ = 0;
   std::atomic<bool> _publish_telemetry = true;
   drone::mqtt::client_mqtt _climqtt;
+  std::unique_ptr<mavsdk::Gimbal> _gimbal = nullptr;
 
  public:
   raptor(std::string const& connection_url);

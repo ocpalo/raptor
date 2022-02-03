@@ -38,6 +38,7 @@ target_link_libraries(main
     MAVSDK::mavsdk_telemetry   #If telemetry plugin used by app ...
     MAVSDK::mavsdk_offboard
     MAVSDK::mavsdk_param
+    MAVSDK::mavsdk_gimbal
     paho-mqttpp3 
     paho-mqtt3as
     # ... Any other linked libraries

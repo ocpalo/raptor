@@ -43,6 +43,8 @@ struct base_attitude {
 class base_drone {
  private:
   mavsdk::Mavsdk _mavsdk;
+
+ protected:
   std::shared_ptr<mavsdk::System> _mavsdk_system;
 
  protected:
