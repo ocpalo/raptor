@@ -6,12 +6,18 @@ if not cap.isOpened() :
 	print('VideoCapture not opened')
 	exit(-1)
 	
+w=int(cap.get(cv2.CAP_PROP_FRAME_WIDTH ))
+h=int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT ))
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+video_writer = cv2.VideoWriter("output.avi", fourcc, 25, (w, h))
+
 while True:
 	ret, frame = cap.read()
 	if not ret:
 		print('frame empty')
 		break
 
+	video_writer.write(frame)
 	cv2.imshow('image', frame)
 
 	if cv2.waitKey(1)&0XFF == ord('q'):
