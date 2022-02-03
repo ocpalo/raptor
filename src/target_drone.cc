@@ -152,7 +152,7 @@ void target_drone::run(char* argv) {
   char c = '0';
   while (c != 'q') {
     std::cin >> c;
-    std::this_thread::sleep_for(0.5s);
+    std::this_thread::sleep_for(0.01s);
   }
   move({});
   stop_publish_telemetry();
@@ -164,7 +164,7 @@ void target_drone::publish_telemetry() {
   while (_publish_telemetry) {
     _climqtt.publish(drone::mqtt::topics::TARGET_TELEMETRY_TOPIC,
                      build_telemetry_message());
-    std::this_thread::sleep_for(std::chrono::milliseconds(800));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
   }
 }
 void target_drone::stop_publish_telemetry() { _publish_telemetry = false; }

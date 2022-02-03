@@ -43,19 +43,20 @@ void raptor::move2() {
       auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
                                         dest_lat, dest_lon);
 
-      move({.forward = 5,
-            .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
-            .yaw = dest_heading - _heading});
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(50ms);
-      /*
       if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
-                          dest_lon) < 5) {
-        move({});
-        _climqtt.publish(mqtt::topics::LOCK, out[4]);
-        targetCount--;
+                          dest_lon) < 3) {
+        move({.forward = 0,
+              .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
+              .yaw = dest_heading - _heading});
+        //_climqtt.publish(mqtt::topics::LOCK, out[4]);
+        // targetCount--;
+      } else {
+        move({.forward = 3,
+              .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
+              .yaw = dest_heading - _heading});
+        using namespace std::chrono_literals;
+        std::this_thread::sleep_for(10ms);
       }
-      */
     } else {
       using namespace std::chrono_literals;
       std::this_thread::sleep_for(50ms);
@@ -63,7 +64,7 @@ void raptor::move2() {
 
     if (!targetCount) break;
   }
-}
+}  // namespace drone
 
 void raptor::publish_telemetry() {
   while (_publish_telemetry) {
