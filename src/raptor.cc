@@ -47,13 +47,13 @@ void raptor::move2() {
                           dest_lon) < 3) {
         move({.forward = 0,
               .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
-              .yaw = dest_heading - _heading});
+              .yaw = static_cast<float>(dest_heading - _heading)});
         //_climqtt.publish(mqtt::topics::LOCK, out[4]);
         // targetCount--;
       } else {
         move({.forward = 3,
               .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
-              .yaw = dest_heading - _heading});
+              .yaw = static_cast<float>(dest_heading - _heading)});
         using namespace std::chrono_literals;
       }
     } else {

@@ -4,21 +4,25 @@
 #include <cmath>
 #include <numbers>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 namespace util {
-template <typename T>
-T haversine(T lat1, T lon1, T lat2, T lon2) {
-  T dLat = (lat2 - lat1) * std::numbers::pi_v<T> / 180.0;
-  T dLon = (lon2 - lon1) * std::numbers::pi_v<T> / 180.0;
 
-  lat1 = (lat1)*std::numbers::pi_v<T> / 180.0;
-  lat2 = (lat2)*std::numbers::pi_v<T> / 180.0;
+template <std::floating_point T>
+T haversine(T src_lat, T src_lon, T dst_lat, T dst_lon) {
+  T lat = (dst_lat - src_lat) * std::numbers::pi_v<T> / 180.0;
+  T lon = (dst_lon - src_lon) * std::numbers::pi_v<T> / 180.0;
 
-  T a = std::pow(std::sin(dLat / 2), 2) +
-        std::pow(std::sin(dLon / 2), 2) * std::cos(lat1) * std::cos(lat2);
+  T rad_src_lat = src_lat * std::numbers::pi_v<T> / 180.0;
+  T rad_dst_lat = dst_lat * std::numbers::pi_v<T> / 180.0;
+
+  T a = std::pow(std::sin(lat / 2), 2) + std::pow(std::sin(lon / 2), 2) *
+                                             std::cos(rad_src_lat) *
+                                             std::cos(rad_dst_lat);
   T rad = 6372797.560856;
   T c = 2 * std::asin(std::sqrt(a));
+
   return rad * c;
 }
 
@@ -38,15 +42,15 @@ T haversine(T lat1, T lon1, T lat2, T lon2) {
  *
  *   Y = cos θa * sin θb – sin θa * cos θb * cos ∆L
  */
-template <typename T>
+template <std::floating_point T>
 T bearing(T lat1, T lon1, T lat2, T lon2) {
-  lat1 = (lat1 * (std::numbers::pi_v<T> / 180));
-  lon1 = (lon1 * (std::numbers::pi_v<T> / 180));
-  lat2 = (lat2 * (std::numbers::pi_v<T> / 180));
-  lon2 = (lon2 * (std::numbers::pi_v<T> / 180));
-  T x = std::cos(lat2) * std::sin(lon2 - lon1);
-  T y = std::cos(lat1) * std::sin(lat2) -
-        std::sin(lat1) * std::cos(lat2) * std::cos(lon2 - lon1);
+  T lat = (lat1 * (std::numbers::pi_v<T> / 180));
+  T lon = (lon1 * (std::numbers::pi_v<T> / 180));
+  T dlat = (lat2 * (std::numbers::pi_v<T> / 180));
+  T dlon = (lon2 * (std::numbers::pi_v<T> / 180));
+  T x = std::cos(dlat) * std::sin(dlon - lon);
+  T y = std::cos(lat) * std::sin(dlat) -
+        std::sin(lat) * std::cos(dlat) * std::cos(dlon - lon);
   T bearing = std::atan2(x, y);
   return std::fmod(bearing * 180 / std::numbers::pi_v<T> + 360, 360);
 }
