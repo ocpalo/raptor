@@ -6,6 +6,7 @@
 #include <thread>
 
 #include "base_drone.h"
+#include "timer.h"
 #include "util.h"
 
 namespace drone {
@@ -27,64 +28,78 @@ raptor::raptor(std::string const& conn_url)
 }
 
 void raptor::move2() {
+  state_ = STATE::SEARCH;
   _climqtt.subscribe(drone::mqtt::topics::TELEMETRY_RESPONSE_TOPIC);
-  int targetCount = 2;
-  while (true) {
-    auto opt_msg = _climqtt.consume();
-    if (opt_msg.has_value()) {
-      auto msg = opt_msg.value();
-      auto out = drone::util::split(msg.second, ',');
 
-      double dest_lat = std::stod(out[5]);
-      double dest_lon = std::stod(out[6]);
-
-      if (std::stoi(out[4]) == id_) continue;
-
-      auto dest_heading = drone::util::bearing(
-          position_.lat_deg_, position_.lon_deg_, dest_lat, dest_lon);
-
-      if (drone::util::haversine(position_.lat_deg_, position_.lon_deg_,
-                                 dest_lat, dest_lon) < 3) {
-        move({.forward = 0,
-              .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
-              .yaw = static_cast<float>(dest_heading - _heading)});
-        //_climqtt.publish(mqtt::topics::LOCK, out[4]);
-        // targetCount--;
-      } else {
-        move({.forward = 3,
-              .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
-              .yaw = static_cast<float>(dest_heading - _heading)});
-        using namespace std::chrono_literals;
-      }
-    } else {
-      using namespace std::chrono_literals;
-      std::this_thread::sleep_for(50ms);
+  while (target_count_) {
+    if (state_ == STATE::SEARCH) {
+      state_search();
+    } else if (state_ == STATE::LOCK) {
+      state_lock();
     }
-
-    if (!targetCount) break;
-  }
-}  // namespace drone
-
-void raptor::publish_telemetry() {
-  while (_publish_telemetry) {
-    _climqtt.publish(
-        drone::mqtt::topics::TELEMETRY_TOPIC,
-        std::move(drone::util::get_string(
-            ' ', id_, position_.lat_deg_, position_.lon_deg_,
-            position_.rel_alt_, attitude_.roll_deg_, attitude_.pitch_deg_,
-            attitude_.yaw_deg_, speed_m_s_, battery_remaning_percent_, 1, 0, 0,
-            0, 0, 0, 0, 0, 0, 0)));
-    std::this_thread::sleep_for(std::chrono::milliseconds(90));
+    if (state_ == STATE::INIT) {
+      land();
+    }
   }
 }
 
-void raptor::stop_publish_telemetry() { _publish_telemetry = false; }
+void raptor::publish_telemetry() {
+  _climqtt.publish(
+      drone::mqtt::topics::TELEMETRY_TOPIC,
+      std::move(drone::util::get_string(
+          ' ', id_, position_.lat_deg_, position_.lon_deg_, position_.rel_alt_,
+          attitude_.roll_deg_, attitude_.pitch_deg_, attitude_.yaw_deg_,
+          speed_m_s_, battery_remaning_percent_, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+          0)));
+}
 
 mavsdk::Action::Result raptor::do_land() {
   _climqtt.publish(drone::mqtt::topics::LAND_TOPIC,
                    std::move(std::to_string(id_)));
   auto resp = base_drone::do_land();
   return resp;
+}
+
+void raptor::state_search() {
+  using namespace std::chrono_literals;
+
+  publish_telemetry();
+  auto opt_msg = _climqtt.consume();
+
+  if (opt_msg.has_value()) {
+    auto msg = opt_msg.value();
+    auto out = drone::util::split(msg.second, ',');
+
+    double dest_lat = std::stod(out[5]);
+    double dest_lon = std::stod(out[6]);
+
+    auto dest_heading = drone::util::bearing(
+        position_.lat_deg_, position_.lon_deg_, dest_lat, dest_lon);
+
+    if (drone::util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
+                               dest_lon) < 5) {
+      // Set state_ to LOCK
+      move({.forward = 0,
+            .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
+            .yaw = static_cast<float>(dest_heading - _heading)});
+      state_ = STATE::LOCK;
+    } else {
+      move({.forward = 3,
+            .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
+            .yaw = static_cast<float>(dest_heading - _heading)});
+    }
+    std::this_thread::sleep_for(30ms);
+  } else {
+    std::this_thread::sleep_for(500ms);
+  }
+}
+
+void raptor::state_lock() {
+  std::cout << "in state lock\n";
+  std::this_thread::sleep_for(std::chrono::seconds(1));
+  state_ = STATE::SEARCH;
+  //_climqtt.publish(mqtt::topics::LOCK, out[4]);
+  // targetCount--;
 }
 
 }  // namespace drone

@@ -12,8 +12,11 @@
 namespace drone {
 
 class raptor final : public base_drone {
+  enum class STATE { INIT, SEARCH, LOCK };
+
   int id_ = 0;
-  std::atomic<bool> _publish_telemetry = true;
+  STATE state_ = STATE::INIT;
+  int target_count_ = 3;
   drone::mqtt::client_mqtt _climqtt;
   std::unique_ptr<mavsdk::Gimbal> _gimbal = nullptr;
 
@@ -23,10 +26,13 @@ class raptor final : public base_drone {
 
   void move2();
   void publish_telemetry();
-  void stop_publish_telemetry();
 
  protected:
   mavsdk::Action::Result do_land() override;
+
+ private:
+  void state_search();
+  void state_lock();
 };
 }  // namespace drone
 
