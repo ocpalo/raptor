@@ -42,31 +42,17 @@ void target_drone::mission_1() {
 
   // Move forward 40 meter, 10m/s
   move_m(40, {.forward = 10});
-  offboard_hover(10);
-
-  /*
-   * Before starting to fly hover 5 sec
-   * Then draw square until "q" is pressed
-   * This methods runs in detached thread.
-   * Terminal is waiting user input("q") to terminate program
-   * */
   offboard_hover(5);
-  float speed = 5.0;
+
+  float speed = 3.0;
   while (1) {
     move_m(40, {.forward = speed});
-    offboard_hover(5);
     move_m(40, {.right = speed});
-    offboard_hover(5);
     move_m(40, {.forward = -speed});
-    offboard_hover(5);
     move_m(40, {.right = -speed});
-    offboard_hover(5);
   }
 }
 
-// TODO:: Implement these missions, maybe find a better way to approach this
-// problem
-//        Factory design pattern?
 void target_drone::mission_2() {
   debug_print(".**************MISSION 2 started**************");
   using namespace std::chrono_literals;
@@ -80,19 +66,12 @@ void target_drone::mission_2() {
   move_m(40, {.forward = 10});
   offboard_hover(3);
 
-  /*
-   * Before starting to fly hover 5 sec
-   * Then draw the line until "q" is pressed
-   * This methods runs in detached thread.
-   * Terminal is waiting user input("q") to terminate program
-   * */
-  offboard_hover(8);
-  float speed = 5.0;
+  float speed = 3.0;
   while (1) {
-    move_m(40, {.forward = speed});
-    offboard_hover(10);
-    move_m(40, {.forward = -speed});
-    offboard_hover(10);
+    move_m(20, {.forward = speed});
+    offboard_hover(2);
+    move_m(20, {.forward = -speed});
+    offboard_hover(2);
   }
 }
 
@@ -109,23 +88,10 @@ void target_drone::mission_3() {
   move_m(40, {.forward = 10});
   offboard_hover(3);
 
-  /*
-   * Before starting to fly hover 5 sec
-   * Then draw square until "q" is pressed
-   * This methods runs in detached thread.
-   * Terminal is waiting user input("q") to terminate program
-   * */
-  offboard_hover(12);
-  float speed = 5.0;
+  float speed = 3.0;
   while (1) {
-    move_m(40, {.forward = speed});
-    offboard_hover(15);
-    move_m(40, {.forward = -speed});
-    offboard_hover(15);
-    move_m(40, {.right = speed});
-    offboard_hover(15);
-    move_m(40, {.right = -speed});
-    offboard_hover(15);
+    move({.forward = speed, .yaw = speed * 4});
+    std::this_thread::sleep_for(std::chrono::minutes(1));
   }
 }
 
