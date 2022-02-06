@@ -29,7 +29,6 @@ client_mqtt::client_mqtt(std::string const& server_address,
 
 void client_mqtt::publish(std::string const& topic, std::string const& msg) {
   client_.publish(::mqtt::message(topic, msg, QOS_, false));
-  debug_print("Send message", msg);
 }
 
 std::optional<std::pair<std::string, std::string>> client_mqtt::consume() {

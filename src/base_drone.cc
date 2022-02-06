@@ -299,7 +299,6 @@ void base_drone::subscribe_heading(double rate_hz) {
   _mavsdk_telemetry->subscribe_heading(
       [this](mavsdk::Telemetry::Heading heading) {
         this->_heading = heading.heading_deg;
-        debug_print("Heading: ", this->_heading);
       });
   debug_print("Subscribed heading");
 }
