@@ -33,18 +33,18 @@ void raptor::move2() {
     auto opt_msg = _climqtt.consume();
     if (opt_msg.has_value()) {
       auto msg = opt_msg.value();
-      auto out = util::split(msg.second, ',');
+      auto out = drone::util::split(msg.second, ',');
 
       double dest_lat = std::stod(out[5]);
       double dest_lon = std::stod(out[6]);
 
       if (std::stoi(out[4]) == id_) continue;
 
-      auto dest_heading = util::bearing(position_.lat_deg_, position_.lon_deg_,
-                                        dest_lat, dest_lon);
+      auto dest_heading = drone::util::bearing(
+          position_.lat_deg_, position_.lon_deg_, dest_lat, dest_lon);
 
-      if (util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
-                          dest_lon) < 3) {
+      if (drone::util::haversine(position_.lat_deg_, position_.lon_deg_,
+                                 dest_lat, dest_lon) < 3) {
         move({.forward = 0,
               .down = (position_.rel_alt_ - std::stof(out[7]) - 2),
               .yaw = static_cast<float>(dest_heading - _heading)});

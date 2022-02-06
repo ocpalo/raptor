@@ -5,7 +5,7 @@
 #include <numbers>
 #include <vector>
 
-namespace util {
+namespace drone::util {
 std::vector<std::string> split(std::string const& line, char delimiter) {
   std::vector<std::string> out;
 
@@ -20,4 +20,4 @@ std::vector<std::string> split(std::string const& line, char delimiter) {
 
   return out;
 }
-}  // namespace util
+}  // namespace drone::util

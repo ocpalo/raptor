@@ -2,7 +2,7 @@
 
 #include <chrono>
 
-namespace util {
+namespace drone::util {
 void Timer::start() {
   _startTime = std::chrono::system_clock::now();
   _running = true;
@@ -25,4 +25,4 @@ std::chrono::milliseconds Timer::elapsedMilliseconds() {
   return std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
                                                                _startTime);
 }
-}  // namespace util
+}  // namespace drone::util

@@ -3,7 +3,7 @@
 
 #include <chrono>
 
-namespace util {
+namespace drone::util {
 class Timer {
  public:
   void start();
@@ -15,6 +15,6 @@ class Timer {
   std::chrono::time_point<std::chrono::system_clock> _endTime;
   bool _running = false;
 };
-}  // namespace util
+}  // namespace drone::util
 
 #endif

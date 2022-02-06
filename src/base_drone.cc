@@ -251,8 +251,8 @@ void base_drone::do_move(base_move move) {
 
 void base_drone::do_move_m(double meter, base_move move) {
   base_position prev = position_;
-  while (util::haversine(prev.lat_deg_, prev.lon_deg_, position_.lat_deg_,
-                         position_.lon_deg_) +
+  while (drone::util::haversine(prev.lat_deg_, prev.lon_deg_,
+                                position_.lat_deg_, position_.lon_deg_) +
              0.5 <
          meter) {
     this->move(move);
