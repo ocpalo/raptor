@@ -28,7 +28,7 @@ class ProcessImage:
         self.new_frame_time = 0
         self.center_x, self.center_y, self.x_axis, self.y_axis, self.box_width, self.box_height = 0, 0, 0, 0, 0, 0
         self.mqtt_cli = mqtt_client
-        self.process_image = False
+        self.process_image = True
         self.land = False
         self.logger = logging.getLogger("image")
         self.logger.setLevel("INFO")
@@ -79,7 +79,7 @@ class ProcessImage:
                     self.mqtt_cli.publish(im_topic, positionMessage)
                     self.drawBoxAndInformation(frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
                 
-                self.showFPS(frame)
+            self.showFPS(frame)
                 
             # end of implementation
             self.video_writer.write(frame)
@@ -97,6 +97,7 @@ class ProcessImage:
         self.net.setInput(blob)
         outs = self.net.forward(self.output_layers)
 
+        isObjectFound = False
         class_ids = []
         confidences = []
         boxes = []
@@ -107,6 +108,7 @@ class ProcessImage:
                 confidence = scores[class_id]
                 if confidence > 0.5:
                     # Object detected
+                    isObjectFound = True
                     self.center_x = int(detection[0] * self.w)
                     self.center_y = int(detection[1] * self.h)
                     self.box_width = int(detection[2] * self.w)
