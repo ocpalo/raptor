@@ -17,6 +17,7 @@ static constexpr auto TELEMETRY_TOPIC{"raptor/telemetry"};
 static constexpr auto TELEMETRY_RESPONSE_TOPIC{"raptor/telemetry/response"};
 static constexpr auto LAND_TOPIC{"raptor/land"};
 static constexpr auto LOCK{"raptor/lock"};
+static constexpr auto PROCESS_IMAGE{"raptor/processImage"};
 static constexpr auto TARGET_TELEMETRY_TOPIC{"target/telemetry"};
 }  // namespace topics
 

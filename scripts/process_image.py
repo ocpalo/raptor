@@ -28,7 +28,8 @@ class ProcessImage:
         self.new_frame_time = 0
         self.center_x, self.center_y, self.x_axis, self.y_axis, self.box_width, self.box_height = 0, 0, 0, 0, 0, 0
         self.mqtt_cli = mqtt_client
-        self.process_image = True
+        self.mqtt_cli.client.loop_start()
+        self.process_image = False
         self.land = False
         self.logger = logging.getLogger("image")
         self.logger.setLevel("INFO")
@@ -49,7 +50,8 @@ class ProcessImage:
         self.w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
-        self.video_writer = cv2.VideoWriter("output.avi", fourcc, 25, (self.w, self.h))
+        self.video_writer = cv2.VideoWriter(
+            "output.avi", fourcc, 25, (self.w, self.h))
         self.logger.info("{} | VideoWriter created. Width: {}, Height: {}, Fourcc: {}".format(
             datetime.now(), self.w, self.h, fourcc))
         atexit.register(self.cleanup)
@@ -72,23 +74,21 @@ class ProcessImage:
 
             # TODO:: Implement image processing here
             if self.process_image:
-
                 yoloResults = self.yoloRecognition(frame)
                 if yoloResults[0]:
                     positionMessage = self.targetObjectPositionWithFOV()
                     self.mqtt_cli.publish(im_topic, positionMessage)
-                    self.drawBoxAndInformation(frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
-                
+                    self.drawBoxAndInformation(
+                        frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
+
             self.showFPS(frame)
-                
+
             # end of implementation
             self.video_writer.write(frame)
             cv2.imshow("Frame", frame)
 
             if cv2.waitKey(1) & 0XFF == ord('q'):
                 break
-
-            
 
     def yoloRecognition(self, frame):
         # Detecting objects
@@ -129,15 +129,16 @@ class ProcessImage:
 
         return [isObjectFound, boxes, indexes, class_ids, center_coordinates]
 
-    def targetObjectPositionWithFOV(self, horizontal_fov = 1.3, vertical_fov = 1.3):
+    def targetObjectPositionWithFOV(self, horizontal_fov=1.3, vertical_fov=1.3):
 
-        align = str((self.center_x-self.w/2)*horizontal_fov/self.w) + "," + str((self.center_y-self.h/2)*vertical_fov/self.h)
+        align = str((self.center_x-self.w/2)*horizontal_fov/self.w) + \
+            "," + str((self.center_y-self.h/2)*vertical_fov/self.h)
         return align
 
     def targetObjectPositionForDebug(self, thresholdValue=.1):
 
         align = ""
-        
+
         threshDikey = int((self.h//2)*thresholdValue)
         threshYatay = int((self.w//2)*thresholdValue)
 
@@ -165,8 +166,6 @@ class ProcessImage:
                 align = align + "yukari git"
 
         return align
-
-
 
     def drawBoxAndInformation(self, frame, boxes, indexes, class_ids, center_coordinates):
 
@@ -204,6 +203,11 @@ class ProcessImage:
             datetime.now(), self.land))
 
     def processImageCallback(self, client, userdata, message):
-        self.process_image = ~self.process_image
+        self.process_image = not self.process_image
         self.logger.info("{} | Process Image Flag is set: {}".format(
             datetime.now(), self.process_image))
+
+    def setCallbacks(self):
+        self.mqtt_cli.subscribe("raptor/land", self.landCallback)
+        self.mqtt_cli.subscribe("raptor/processImage",
+                                self.processImageCallback)

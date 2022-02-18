@@ -14,6 +14,7 @@ namespace drone {
 class raptor final : public base_drone {
   enum class STATE { INIT, SEARCH, LOCK };
 
+  bool request_process_image_ = false;
   int id_ = 0;
   STATE state_ = STATE::INIT;
   int target_count_ = 3;

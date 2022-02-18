@@ -73,6 +73,14 @@ void raptor::state_search() {
     double dest_lat = std::stod(out[5]);
     double dest_lon = std::stod(out[6]);
 
+    if (!request_process_image_ &&
+        drone::util::haversine(position_.lat_deg_, position_.lon_deg_, dest_lat,
+                               dest_lon) < 10) {
+      request_process_image_ = true;
+      _climqtt.publish(drone::mqtt::topics::PROCESS_IMAGE,
+                       std::move(std::to_string(id_)));
+    }
+
     auto dest_heading = drone::util::bearing(
         position_.lat_deg_, position_.lon_deg_, dest_lat, dest_lon);
 
@@ -98,6 +106,11 @@ void raptor::state_lock() {
   std::cout << "in state lock\n";
   std::this_thread::sleep_for(std::chrono::seconds(1));
   state_ = STATE::SEARCH;
+  if (request_process_image_) {
+    request_process_image_ = false;
+    _climqtt.publish(drone::mqtt::topics::PROCESS_IMAGE,
+                     std::move(std::to_string(id_ + 1)));
+  }
   //_climqtt.publish(mqtt::topics::LOCK, out[4]);
   // targetCount--;
 }
