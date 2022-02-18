@@ -8,16 +8,16 @@
 #include "mqtt/client.h"
 
 namespace drone {
-constexpr auto SERVER_ADDRESS{"tcp://localhost:1883"};
-constexpr auto CLIENT_ID{"raptor"};
+static constexpr auto SERVER_ADDRESS{"tcp://localhost:1883"};
+static constexpr auto CLIENT_ID{"raptor"};
 
 namespace mqtt {
 namespace topics {
-constexpr auto TELEMETRY_TOPIC{"raptor/telemetry"};
-constexpr auto TELEMETRY_RESPONSE_TOPIC{"raptor/telemetry/response"};
-constexpr auto LAND_TOPIC{"raptor/land"};
-constexpr auto LOCK{"raptor/lock"};
-constexpr auto TARGET_TELEMETRY_TOPIC{"target/telemetry"};
+static constexpr auto TELEMETRY_TOPIC{"raptor/telemetry"};
+static constexpr auto TELEMETRY_RESPONSE_TOPIC{"raptor/telemetry/response"};
+static constexpr auto LAND_TOPIC{"raptor/land"};
+static constexpr auto LOCK{"raptor/lock"};
+static constexpr auto TARGET_TELEMETRY_TOPIC{"target/telemetry"};
 }  // namespace topics
 
 constexpr auto MQTT_QOS{0};

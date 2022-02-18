@@ -8,7 +8,7 @@
 #include "mqtt.h"
 
 namespace drone {
-int constexpr mock_drone_initial_heading[] = {120, 240, 360};
+static constexpr int mock_drone_initial_heading[] = {120, 240, 360};
 
 class target_drone final : public base_drone {
   int initialHeading;
