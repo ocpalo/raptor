@@ -27,9 +27,6 @@ class raptor final : public base_drone {
 
  protected:
   mavsdk::Action::Result do_land() override;
-
- private:
-  std::string build_telemetry_message();
 };
 }  // namespace drone
 

@@ -3,11 +3,20 @@
 
 #include <cmath>
 #include <numbers>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <vector>
 
 namespace drone::util {
+
+template <typename Head, typename... Tail>
+std::string get_string(char delimeter, const Head &head, const Tail &... tail) {
+  std::stringstream stream;
+  stream << head;
+  ((stream << delimeter << tail), ...);
+  return stream.str();
+}
 
 template <std::floating_point T>
 T haversine(T src_lat, T src_lon, T dst_lat, T dst_lon) {
@@ -54,7 +63,7 @@ T bearing(T lat1, T lon1, T lat2, T lon2) {
   T bearing = std::atan2(x, y);
   return std::fmod(bearing * 180 / std::numbers::pi_v<T> + 360, 360);
 }
-std::vector<std::string> split(std::string const& line, char delimiter);
+std::vector<std::string> split(std::string const &line, char delimiter);
 }  // namespace drone::util
 
 #endif

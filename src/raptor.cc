@@ -67,8 +67,13 @@ void raptor::move2() {
 
 void raptor::publish_telemetry() {
   while (_publish_telemetry) {
-    _climqtt.publish(drone::mqtt::topics::TELEMETRY_TOPIC,
-                     build_telemetry_message());
+    _climqtt.publish(
+        drone::mqtt::topics::TELEMETRY_TOPIC,
+        std::move(drone::util::get_string(
+            ' ', id_, position_.lat_deg_, position_.lon_deg_,
+            position_.rel_alt_, attitude_.roll_deg_, attitude_.pitch_deg_,
+            attitude_.yaw_deg_, speed_m_s_, battery_remaning_percent_, 1, 0, 0,
+            0, 0, 0, 0, 0, 0, 0)));
     std::this_thread::sleep_for(std::chrono::milliseconds(90));
   }
 }
@@ -80,17 +85,6 @@ mavsdk::Action::Result raptor::do_land() {
                    std::move(std::to_string(id_)));
   auto resp = base_drone::do_land();
   return resp;
-}
-
-std::string raptor::build_telemetry_message() {
-  std::stringstream str;
-  str << id_ << " " << position_.lat_deg_ << " " << position_.lon_deg_ << " "
-      << position_.rel_alt_ << " " << attitude_.roll_deg_ << " "
-      << attitude_.pitch_deg_ << " " << attitude_.yaw_deg_ << " " << speed_m_s_
-      << " " << battery_remaning_percent_ << " " << 1 << " " << 0 << " " << 0
-      << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0
-      << " " << 0;
-  return str.str();
 }
 
 }  // namespace drone
