@@ -15,7 +15,10 @@ class ProcessImage:
     def __init__(self, mqtt_client):
         self.net = cv2.dnn.readNet("yolo_files/yolov4-tiny-custom_best.weights",
                                    "yolo_files/yolov4-tiny-custom.cfg")
-
+                                   
+        self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+        self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+	
         self.classes = []
         with open("yolo_files/obj.names", "r") as f:
             self.classes = [line.strip() for line in f.readlines()]
@@ -89,7 +92,7 @@ class ProcessImage:
 
             if cv2.waitKey(1) & 0XFF == ord('q'):
                 break
-
+                
     def yoloRecognition(self, frame):
         # Detecting objects
         blob = cv2.dnn.blobFromImage(
