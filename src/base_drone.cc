@@ -256,6 +256,7 @@ void base_drone::do_move_m(double meter, base_move move) {
              0.5 <
          meter) {
     this->move(move);
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
   }
   this->move({});
 }
