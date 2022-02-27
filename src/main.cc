@@ -24,7 +24,7 @@ int main(int argc, char** argv) {
   }
 
   if (argc == 4) {
-    drone::target_drone b(argv[1], std::stoi(argv[2]), std::stoi(argv[2]));
+    drone::target_drone b(argv[1], std::stoi(argv[2]), std::stoi(argv[3]));
     try {
       b.arm();
       b.takeoff(5);
@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
   } else {
     drone::raptor raptor(argv[1]);
     raptor.arm();
-    raptor.takeoff();
+    raptor.takeoff(5);
     std::this_thread::sleep_for(std::chrono::seconds(2));
     raptor.offboard_init();
     raptor.move2();
