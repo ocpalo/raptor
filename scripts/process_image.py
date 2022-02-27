@@ -15,10 +15,10 @@ class ProcessImage:
     def __init__(self, mqtt_client):
         self.net = cv2.dnn.readNet("yolo_files/yolov4-tiny-custom_best.weights",
                                    "yolo_files/yolov4-tiny-custom.cfg")
-                                   
+
         self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
-	
+
         self.classes = []
         with open("yolo_files/obj.names", "r") as f:
             self.classes = [line.strip() for line in f.readlines()]
@@ -32,7 +32,7 @@ class ProcessImage:
         self.center_x, self.center_y, self.x_axis, self.y_axis, self.box_width, self.box_height = 0, 0, 0, 0, 0, 0
         self.mqtt_cli = mqtt_client
         self.mqtt_cli.client.loop_start()
-        self.process_image = False
+        self.process_image = True
         self.land = False
         self.logger = logging.getLogger("image")
         self.logger.setLevel("INFO")
@@ -50,8 +50,13 @@ class ProcessImage:
 
         self.logger.info("{} | Video capture opened".format(datetime.now()))
 
-        self.w = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.h = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        self.w = 416
+        self.h = 416
+
+        self.tracker = cv2.TrackerKCF_create()
+        self.initObj = None
+        time.sleep(1)
+
         fourcc = cv2.VideoWriter_fourcc(*'XVID')
         self.video_writer = cv2.VideoWriter(
             "output.avi", fourcc, 25, (self.w, self.h))
@@ -70,19 +75,38 @@ class ProcessImage:
     def process(self):
         while not self.land:
             ret, frame = self.cap.read()
+
             if not ret:
                 self.logger.warning(
                     "{} | Reading from VideoCapture failed. Terminating process".format(datetime.now()))
                 exit(1)
 
+            if not self.initObj:
+                self.logger.info(
+                    "{} | Tracker lost the object".format(datetime.now()))
             # TODO:: Implement image processing here
-            if self.process_image:
-                yoloResults = self.yoloRecognition(frame)
-                if yoloResults[0]:
-                    positionMessage = self.targetObjectPositionWithFOV()
-                    self.mqtt_cli.publish(im_topic, positionMessage)
-                    self.drawBoxAndInformation(
-                        frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
+                if self.process_image:
+                    yoloResults = self.yoloRecognition(frame)
+                    if yoloResults[0]:
+                        positionMessage = self.targetObjectPositionWithFOV()
+                        self.mqtt_cli.publish(im_topic, positionMessage)
+                        self.drawBoxAndInformation(
+                            frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
+            else:
+                ok, bbox = self.tracker.update(frame)
+                if not ok:
+                    self.tracker = cv2.TrackerKCF_create()
+                    self.initObj = False
+                else:
+                    print("Tracker tracking!")
+                    p1 = (int(bbox[0]), int(bbox[1]))
+                    p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
+                    print(p1, p2)
+                    cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+                    align = str(((bbox[0] + (bbox[2])/2)-self.w/2)*1.3/self.w) + \
+                        "," + str(((bbox[1] + (bbox[3])/2) -
+                                  self.h/2)*1.3/self.h)
+                    print(align)
 
             self.showFPS(frame)
 
@@ -92,7 +116,7 @@ class ProcessImage:
 
             if cv2.waitKey(1) & 0XFF == ord('q'):
                 break
-                
+
     def yoloRecognition(self, frame):
         # Detecting objects
         blob = cv2.dnn.blobFromImage(
@@ -138,38 +162,6 @@ class ProcessImage:
             "," + str((self.center_y-self.h/2)*vertical_fov/self.h)
         return align
 
-    def targetObjectPositionForDebug(self, thresholdValue=.1):
-
-        align = ""
-
-        threshDikey = int((self.h//2)*thresholdValue)
-        threshYatay = int((self.w//2)*thresholdValue)
-
-        if (((self.center_y <= (self.h//2 + threshDikey)) and (self.center_y >= (self.h//2 - threshDikey))) and
-                ((self.center_x <= (self.w//2 + threshYatay)) and (self.center_x >= (self.w//2 - threshYatay)))):
-            align = "merkezde"
-        elif ((self.center_y <= (self.h//2 + threshDikey)) and (self.center_y >= (self.h//2 - threshDikey))):
-            if (self.center_x > (self.w//2 + threshYatay)):
-                align = "saga git"
-            elif (self.center_x < (self.w//2 - threshYatay)):
-                align = "sola git"
-        elif ((self.center_x <= (self.w//2 + threshYatay)) and (self.center_x >= (self.w//2 - threshYatay))):
-            if (self.center_y > (self.h//2 + threshDikey)):
-                align = "asagi git"
-            elif (self.center_y < (self.h//2 - threshDikey)):
-                align = "yukari git"
-        else:
-            if (self.center_x > (self.w//2 + threshYatay)):
-                align = align + "!sag "
-            if (self.center_x < (self.w//2 - threshYatay)):
-                align = align + "!sol "
-            if (self.center_y > (self.h//2 + threshDikey)):
-                align = align + "asagi git"
-            if (self.center_y < (self.h//2 - threshDikey)):
-                align = align + "yukari git"
-
-        return align
-
     def drawBoxAndInformation(self, frame, boxes, indexes, class_ids, center_coordinates):
 
         font = cv2.FONT_HERSHEY_PLAIN
@@ -183,6 +175,11 @@ class ProcessImage:
                     color = (0, 0, 255)
                 cv2.rectangle(frame, (self.x_axis, self.y_axis), (self.x_axis +
                               self.box_width, self.y_axis + self.box_height), color, 2)
+
+                ok = self.tracker.init(
+                    frame, (self.x_axis, self.y_axis, self.box_width, self.box_height))
+                self.initObj = True
+
                 cv2.putText(frame, label, (self.x_axis,
                             self.y_axis + 30), font, 3, color, 3)
                 cv2.putText(frame, ".", (self.center_x, self.center_y),
