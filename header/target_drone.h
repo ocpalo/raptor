@@ -28,6 +28,7 @@ class target_drone final : public base_drone {
   void mission_1();
   void mission_2();
   void mission_3();
+  void control_wasd();
   void run(char* argv);
 };
 }  // namespace drone

@@ -25,7 +25,7 @@ namespace drone {
 
 target_drone::target_drone(std::string const& conn_url, int mission, int id)
     : base_drone(conn_url),
-      initialHeading(mock_drone_initial_heading[mission - 1]),
+      initialHeading(mock_drone_initial_heading[id - 1]),
       id_(id),
       _climqtt(drone::SERVER_ADDRESS, std::to_string(id_)) {
   _climqtt.connect();
@@ -68,10 +68,7 @@ void target_drone::mission_2() {
 
   float speed = 3.0;
   while (1) {
-    move_m(20, {.forward = speed});
-    offboard_hover(2);
-    move_m(20, {.forward = -speed});
-    offboard_hover(2);
+    offboard_hover(200000);
   }
 }
 
@@ -95,6 +92,39 @@ void target_drone::mission_3() {
   }
 }
 
+void target_drone::control_wasd() {
+  using namespace std::chrono_literals;
+
+  char c = '0';
+  int ws_speed, ad_speed;
+  ws_speed = 0;
+  ad_speed = 0;
+  while (c != 'q') {
+    std::cin >> c;
+    switch (c) {
+      case 'w':
+        ws_speed++;
+        move({.forward = ws_speed, .right = ad_speed});
+        break;
+      case 'a':
+        ad_speed--;
+        move({.forward = ws_speed, .right = ad_speed});
+        break;
+      case 's':
+        ws_speed--;
+        move({.forward = ws_speed, .right = ad_speed});
+        break;
+      case 'd':
+        ad_speed++;
+        move({.forward = ws_speed, .right = ad_speed});
+        break;
+      default:
+        break;
+    }
+    std::this_thread::sleep_for(0.03s);
+  }
+}
+
 void target_drone::run(char* argv) {
   auto fut = std::async(std::launch::async,
                         &drone::target_drone::publish_telemetry, this);
@@ -110,6 +140,8 @@ void target_drone::run(char* argv) {
     case '3':
       thr = std::jthread(&target_drone::mission_3, this);
       break;
+    case '4':
+      control_wasd();
 
     default:
       break;
