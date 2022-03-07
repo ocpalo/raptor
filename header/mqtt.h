@@ -21,7 +21,7 @@ static constexpr auto PROCESS_IMAGE{"raptor/processImage"};
 static constexpr auto TARGET_TELEMETRY_TOPIC{"target/telemetry"};
 }  // namespace topics
 
-constexpr auto MQTT_QOS{0};
+constexpr auto MQTT_QOS{2};
 
 class client_mqtt {
  public:

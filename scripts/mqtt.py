@@ -37,7 +37,7 @@ class uav_mqtt:
                 status, datetime.now(), topic, message))
 
     def subscribe(self, topic, callback_fn):
-        self.client.subscribe(topic)
+        self.client.subscribe(topic, 2)
         self.client.message_callback_add(topic, callback_fn)
         self.logger.info(
             "{} | Subscribed to topic {}".format(datetime.now(), topic))

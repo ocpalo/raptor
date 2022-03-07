@@ -88,10 +88,6 @@ void raptor::state_search() {
 
     auto dest_heading = drone::util::bearing(
         position_.lat_deg_, position_.lon_deg_, dest_lat, dest_lon);
-    debug_print("Dest heading(bearing): ", dest_heading);
-    debug_print("Heading: ", _heading);
-    debug_print("dest_heading - _heading", dest_heading - _heading);
-    debug_print("******************************************************");
 
     move({.forward = 3,
           .down = (position_.rel_alt_ - std::stof(out[7]) - 1),
@@ -106,7 +102,7 @@ void raptor::state_search() {
 constexpr static auto imcoor = "im/coord";
 
 void raptor::state_lock() {
-  _climqtt.subscribe("im/coord");
+  static int counter = 0;
   debug_print("STATE: LOCK");
   if (request_process_image_) {
     request_process_image_ = false;
@@ -120,20 +116,23 @@ void raptor::state_lock() {
   if (opt_msg.has_value()) {
     auto msg = opt_msg.value();
     std::cout << "Message: " << msg.first << " " << msg.second << "\n";
-    if (msg.first != imcoor) {
+    if (msg.first != imcoor && counter == 3) {
+      counter = 0;
+      state_ = STATE::SEARCH;
       debug_print("Setting state to SEARCH");
+      return;
     }
     auto out = drone::util::split(msg.second, ',');
     if (out.size() != 2) {
       debug_print("Response size is lower than 2, invalid message");
       debug_print("Response size:", out.size());
-      state_ = STATE::SEARCH;
+      counter++;
       return;
     }
     debug_print("im/coord value[0]: ", out[0]);
     debug_print("im/coord value[1]: ", out[1]);
     move(
-        {.forward = 1 + (-std::stof(out[1])), .yaw = 40 * (std::stof(out[0]))});
+        {.forward = 3 + (-std::stof(out[1])), .yaw = 90 * (std::stof(out[0]))});
   } else {
     debug_print("No message received in 500msec, settin state to SEARCH");
     state_ = STATE::SEARCH;

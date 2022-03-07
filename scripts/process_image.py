@@ -32,7 +32,7 @@ class ProcessImage:
         self.center_x, self.center_y, self.x_axis, self.y_axis, self.box_width, self.box_height = 0, 0, 0, 0, 0, 0
         self.mqtt_cli = mqtt_client
         self.mqtt_cli.client.loop_start()
-        self.process_image = True
+        self.process_image = False
         self.land = False
         self.logger = logging.getLogger("image")
         self.logger.setLevel("INFO")
@@ -53,7 +53,7 @@ class ProcessImage:
         self.w = 416
         self.h = 416
 
-        self.tracker = cv2.TrackerKCF_create()
+        self.tracker = cv2.TrackerCSRT_create()
         self.initObj = None
         time.sleep(1)
 
@@ -95,18 +95,18 @@ class ProcessImage:
             else:
                 ok, bbox = self.tracker.update(frame)
                 if not ok:
-                    self.tracker = cv2.TrackerKCF_create()
+                    self.tracker = cv2.TrackerCSRT_create()
                     self.initObj = False
                 else:
                     print("Tracker tracking!")
                     p1 = (int(bbox[0]), int(bbox[1]))
                     p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-                    print(p1, p2)
                     cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
                     align = str(((bbox[0] + (bbox[2])/2)-self.w/2)*1.3/self.w) + \
                         "," + str(((bbox[1] + (bbox[3])/2) -
                                   self.h/2)*1.3/self.h)
                     print(align)
+                    self.mqtt_cli.publish(im_topic, align)
 
             self.showFPS(frame)
 
