@@ -35,6 +35,7 @@ void raptor::move2() {
     if (state_ == STATE::SEARCH) {
       state_search();
     } else if (state_ == STATE::LOCK) {
+      if (!timer.running()) timer.start();
       state_lock();
     }
     if (state_ == STATE::INIT) {
@@ -74,6 +75,7 @@ void raptor::state_search() {
     }
     auto out = drone::util::split(msg.second, ',');
 
+    current_target_id_ = std::stoi(out[4]);
     double dest_lat = std::stod(out[5]);
     double dest_lon = std::stod(out[6]);
 
@@ -82,14 +84,14 @@ void raptor::state_search() {
                                dest_lon) < 10) {
       request_process_image_ = true;
       _climqtt.publish(drone::mqtt::topics::PROCESS_IMAGE,
-                       std::move(std::to_string(id_)));
+                       "START PROCESS IMAGE");
       _climqtt.subscribe("im/coord");
     }
 
     auto dest_heading = drone::util::bearing(
         position_.lat_deg_, position_.lon_deg_, dest_lat, dest_lon);
 
-    move({.forward = 3,
+    move({.forward = 3.5,
           .down = (position_.rel_alt_ - std::stof(out[7]) - 1),
           .yaw = static_cast<float>(dest_heading - _heading)});
 
@@ -102,16 +104,20 @@ void raptor::state_search() {
 constexpr static auto imcoor = "im/coord";
 
 void raptor::state_lock() {
-  static int counter = 0;
-  debug_print("STATE: LOCK");
-  if (request_process_image_) {
+  if (timer.elapsedMilliseconds() >
+      std::chrono::duration(std::chrono::seconds(10))) {
+    debug_print("Publishing LOCK topic with message: ", current_target_id_);
+    target_count_ -= 1;
+    _climqtt.publish(mqtt::topics::LOCK, std::to_string(current_target_id_));
+    _climqtt.publish(mqtt::topics::PROCESS_IMAGE, "STOP PROCESS IMAGE");
     request_process_image_ = false;
-    _climqtt.publish(drone::mqtt::topics::PROCESS_IMAGE,
-                     std::move(std::to_string(id_ + 1)));
-    debug_print("Process image message sent!");
+    offboard_hover(5);
+    state_ = STATE::SEARCH;
+    timer.stop();
+    return;
   }
+  static int counter = 0;
 
-  debug_print("Try to consume message");
   auto opt_msg = _climqtt.consume();
   if (opt_msg.has_value()) {
     auto msg = opt_msg.value();
@@ -119,22 +125,19 @@ void raptor::state_lock() {
     if (msg.first != imcoor && counter == 3) {
       counter = 0;
       state_ = STATE::SEARCH;
-      debug_print("Setting state to SEARCH");
+      timer.stop();
       return;
     }
     auto out = drone::util::split(msg.second, ',');
     if (out.size() != 2) {
-      debug_print("Response size is lower than 2, invalid message");
-      debug_print("Response size:", out.size());
       counter++;
       return;
     }
-    debug_print("im/coord value[0]: ", out[0]);
-    debug_print("im/coord value[1]: ", out[1]);
     move(
         {.forward = 3 + (-std::stof(out[1])), .yaw = 90 * (std::stof(out[0]))});
   } else {
     debug_print("No message received in 500msec, settin state to SEARCH");
+    timer.stop();
     state_ = STATE::SEARCH;
   }
   //_climqtt.publish(mqtt::topics::LOCK, out[4]);

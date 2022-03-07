@@ -8,6 +8,7 @@
 
 #include "base_drone.h"
 #include "mqtt.h"
+#include "timer.h"
 
 namespace drone {
 
@@ -18,8 +19,10 @@ class raptor final : public base_drone {
   int id_ = 0;
   STATE state_ = STATE::INIT;
   int target_count_ = 3;
+  int current_target_id_ = -1;
   drone::mqtt::client_mqtt _climqtt;
   std::unique_ptr<mavsdk::Gimbal> _gimbal = nullptr;
+  drone::util::Timer timer;
 
  public:
   raptor(std::string const& connection_url);

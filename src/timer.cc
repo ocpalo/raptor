@@ -13,6 +13,8 @@ void Timer::stop() {
   _running = false;
 }
 
+bool Timer::running() { return _running; }
+
 std::chrono::milliseconds Timer::elapsedMilliseconds() {
   std::chrono::time_point<std::chrono::system_clock> endTime;
 

@@ -9,6 +9,7 @@ class Timer {
   void start();
   void stop();
   std::chrono::milliseconds elapsedMilliseconds();
+  bool running();
 
  private:
   std::chrono::time_point<std::chrono::system_clock> _startTime;
