@@ -68,7 +68,10 @@ void target_drone::mission_2() {
 
   float speed = 3.0;
   while (1) {
-    offboard_hover(200000);
+    move_m(40, {.forward = speed, .yaw = speed * 4});
+    move_m(40, {.right = speed, .yaw = speed * 4});
+    move_m(40, {.forward = -speed, .yaw = speed * 4});
+    move_m(40, {.right = -speed, .yaw = speed * 4});
   }
 }
 
