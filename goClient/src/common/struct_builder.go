@@ -49,7 +49,7 @@ func BuildTelemetryRequest(i *TelemetryRequest, str string) error {
 }
 
 func BuildLockInfo(i *LockInformation, str string) error {
-	strList := strings.Split(str, " ")
+	strList := strings.Split(str, ",")
 	if len(strList) != 9 {
 		return &StringSplitError{
 			StatusCode: -1,

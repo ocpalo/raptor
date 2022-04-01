@@ -56,6 +56,19 @@ func (c *Client) LockCallback(client mqtt.Client, msg mqtt.Message) {
 	common.LockedIndex, _ = strconv.Atoi(string(msg.Payload()))
 }
 
+func (c *Client) LockInfoCallback(client mqtt.Client, msg mqtt.Message) {
+	var lockinfo common.LockInformation
+	var resp common.LockInformation
+	common.BuildLockInfo(&lockinfo, string(msg.Payload()))
+	status := post.Post(common.PostLockInfo, &lockinfo, &resp)
+	print(status)
+	print(&resp)
+	handled := proxy.HandleStatus(status)
+	if !handled {
+		return
+	}
+}
+
 func (c *Client) Init(port int, host string) {
 	c.host = host
 	c.port = port
@@ -80,6 +93,11 @@ func (c *Client) Subscribe(topic string) {
 		}
 	} else if topic == "raptor/lock" {
 		if token := c.client.Subscribe(topic, 1, c.LockCallback); token.Wait() && token.Error() != nil {
+			log.Fatalln(token.Error())
+			return
+		}
+	} else if topic == "raptor/lock_info" {
+		if token := c.client.Subscribe(topic, 1, c.LockInfoCallback); token.Wait() && token.Error() != nil {
 			log.Fatalln(token.Error())
 			return
 		}

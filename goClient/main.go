@@ -33,6 +33,7 @@ func main() {
 	cli.Subscribe("raptor/land")
 	cli.Subscribe("raptor/lock")
 	cli.Subscribe("target/telemetry")
+	cli.Subscribe(("raptor/lock_info"))
 
 	scheduler.StartAsync()
 
