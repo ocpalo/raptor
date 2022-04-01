@@ -6,6 +6,7 @@
 #include <mavsdk/plugins/offboard/offboard.h>
 #include <mavsdk/plugins/telemetry/telemetry.h>
 
+#include <optional>
 #include <string>
 #include <utility>
 

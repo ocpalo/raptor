@@ -1,6 +1,7 @@
 #include "raptor.h"
 
 #include <chrono>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -35,7 +36,10 @@ void raptor::move2() {
     if (state_ == STATE::SEARCH) {
       state_search();
     } else if (state_ == STATE::LOCK) {
-      if (!timer.running()) timer.start();
+      if (!timer.running()) {
+        this->lock_time_init_ = std::chrono::system_clock::now();
+        timer.start();
+      }
       state_lock();
     }
     if (state_ == STATE::INIT) {
@@ -111,9 +115,31 @@ void raptor::state_lock() {
     _climqtt.publish(mqtt::topics::LOCK, std::to_string(current_target_id_));
     _climqtt.publish(mqtt::topics::PROCESS_IMAGE, "STOP PROCESS IMAGE");
     request_process_image_ = false;
+
+    auto init_dp = std::chrono::floor<std::chrono::days>(lock_time_init_);
+    std::chrono::hh_mm_ss init_time{
+        std::chrono::floor<std::chrono::milliseconds>(lock_time_init_ -
+                                                      init_dp)};
+
+    auto tp = std::chrono::system_clock::now();
+    auto dp = std::chrono::floor<std::chrono::days>(tp);
+    std::chrono::hh_mm_ss time{
+        std::chrono::floor<std::chrono::milliseconds>(tp - dp)};
+
+    this->_climqtt.publish(
+        drone::mqtt::topics::LOCK_INFO,
+        std::move(drone::util::get_string(
+            ',', time.hours().count(), time.minutes().count(),
+            time.seconds().count(), time.subseconds().count())) +
+            "," +
+            std::move(drone::util::get_string(',', init_time.hours().count(),
+                                              init_time.minutes().count(),
+                                              init_time.seconds().count(),
+                                              init_time.subseconds().count()) +
+                      ",1"));
+    timer.stop();
     offboard_hover(5);
     state_ = STATE::SEARCH;
-    timer.stop();
     return;
   }
   static int counter = 0;
@@ -140,8 +166,6 @@ void raptor::state_lock() {
     timer.stop();
     state_ = STATE::SEARCH;
   }
-  //_climqtt.publish(mqtt::topics::LOCK, out[4]);
-  // targetCount--;
 }
 
 }  // namespace drone

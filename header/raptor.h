@@ -4,6 +4,7 @@
 #include <mavsdk/plugins/gimbal/gimbal.h>
 
 #include <atomic>
+#include <chrono>
 #include <string>
 
 #include "base_drone.h"
@@ -23,6 +24,7 @@ class raptor final : public base_drone {
   drone::mqtt::client_mqtt _climqtt;
   std::unique_ptr<mavsdk::Gimbal> _gimbal = nullptr;
   drone::util::Timer timer;
+  std::chrono::time_point<std::chrono::system_clock> lock_time_init_;
 
  public:
   raptor(std::string const& connection_url);
