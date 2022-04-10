@@ -1,6 +1,8 @@
 import atexit
 from datetime import datetime
 import logging
+import textwrap
+from turtle import width
 import cv2
 from http import client
 from mqtt import uav_mqtt
@@ -98,15 +100,22 @@ class ProcessImage:
                     self.tracker = cv2.TrackerCSRT_create()
                     self.initObj = False
                 else:
-                    print("Tracker tracking!")
                     p1 = (int(bbox[0]), int(bbox[1]))
                     p2 = (int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3]))
-                    cv2.rectangle(frame, p1, p2, (255, 0, 0), 2, 1)
+                    cv2.rectangle(frame, p1, p2, (255, 0, 0), 1, 1)
                     align = str(((bbox[0] + (bbox[2])/2)-self.w/2)*1.3/self.w) + \
                         "," + str(((bbox[1] + (bbox[3])/2) -
                                   self.h/2)*1.3/self.h)
-                    print(align)
+                    cv2.line(frame, (self.w//2, self.h//2),
+                             (bbox[0] + (bbox[2])//2, bbox[1] + (bbox[3])//2), (255, 0, 0), 2)
                     self.mqtt_cli.publish(im_topic, align)
+                    x = str(((bbox[0] + (bbox[2])/2)-self.w/2)*1.3/self.w)
+                    y = str(((bbox[1] + (bbox[3])/2) -
+                             self.h/2)*1.3/self.h)
+                    cv2.putText(frame, "X: " + x[:7], (10, self.w - 40),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (112, 0, 0), 1)
+                    cv2.putText(frame, "Y: " + y[:7], (10, self.w - 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (112, 0, 0), 1)
 
             self.showFPS(frame)
 
@@ -194,8 +203,8 @@ class ProcessImage:
         self.prev_frame_time = self.new_frame_time
         fps = int(fps)
         fps = str(fps)
-        cv2.putText(frame, fps, (7, 70), font, 3,
-                    (100, 255, 0), 3, cv2.LINE_AA)
+        cv2.putText(frame, fps, (7, 20), font, 1,
+                    (0, 0, 0), 2, cv2.LINE_AA)
 
     def landCallback(self, client, userdata, message):
         self.land = True
@@ -207,7 +216,12 @@ class ProcessImage:
         self.logger.info("{} | Process Image Flag is set: {}".format(
             datetime.now(), self.process_image))
 
+    def lockTargetIdCallback(self, client, userdata, message):
+        self.targetId = str(message.payload.decode("utf-8"))
+        print(self.targetId)
+
     def setCallbacks(self):
         self.mqtt_cli.subscribe("raptor/land", self.landCallback)
         self.mqtt_cli.subscribe("raptor/processImage",
                                 self.processImageCallback)
+        self.mqtt_cli.subscribe("raptor/lock", self.lockTargetIdCallback)
