@@ -2,7 +2,7 @@ import atexit
 from datetime import datetime
 import logging
 import textwrap
-from turtle import width
+from turtle import color, width
 import cv2
 from http import client
 from mqtt import uav_mqtt
@@ -66,6 +66,11 @@ class ProcessImage:
             datetime.now(), self.w, self.h, fourcc))
         atexit.register(self.cleanup)
 
+        self.isLockedToTarget_1 = False
+        self.isLockedToTarget_2 = False
+        self.isLockedToTarget_3 = False
+        self.start_time = None
+
     def cleanup(self):
         if self.cap.isOpened():
             self.cap.release()
@@ -92,8 +97,7 @@ class ProcessImage:
                     if yoloResults[0]:
                         positionMessage = self.targetObjectPositionWithFOV()
                         self.mqtt_cli.publish(im_topic, positionMessage)
-                        self.drawBoxAndInformation(
-                            frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
+                        self.drawBoxAndInformation(frame, yoloResults[1], yoloResults[2], yoloResults[3], yoloResults[4])
             else:
                 ok, bbox = self.tracker.update(frame)
                 if not ok:
@@ -118,6 +122,8 @@ class ProcessImage:
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (112, 0, 0), 1)
 
             self.showFPS(frame)
+            self.drawCameraUI(frame)
+
 
             # end of implementation
             self.video_writer.write(frame)
@@ -125,6 +131,62 @@ class ProcessImage:
 
             if cv2.waitKey(1) & 0XFF == ord('q'):
                 break
+
+    def drawCameraUI(self, frame):
+
+        #targets
+
+        cv2.putText(frame, "Targets:", (self.h - 120, self.w - 85),
+                                cv2.FONT_HERSHEY_TRIPLEX, .7, (10, 238, 171), 1)
+
+        cv2.putText(frame, "UAV 1: " + str(self.isLockedToTarget_1), (self.h - 120, self.w - 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, .5, (10, 20, 21), 1)
+        cv2.putText(frame, "UAV 2: " + str(self.isLockedToTarget_2), (self.h - 120, self.w - 40),
+                                cv2.FONT_HERSHEY_SIMPLEX, .5, (10, 20, 21), 1)
+        cv2.putText(frame, "UAV 3: " + str(self.isLockedToTarget_3), (self.h - 120, self.w - 20),
+                                cv2.FONT_HERSHEY_SIMPLEX, .5, (10, 20, 21), 1)
+
+        #counter
+
+        #mission status text
+        self.drawMissionStatusText(frame)
+
+    def drawMissionStatusText(self, frame):
+        text = ""
+        color = (255,255,255)
+        if self.land:
+            text = "Landing"
+            color = (8, 7, 7)
+        elif self.initObj:
+            
+            if self.process_image:
+
+                text = "Tracking"
+                color = (146, 255, 149)
+
+            diff = (datetime.now() - self.start_time).seconds
+
+            counterText = ""
+
+            if diff <= 10:
+                counterText = str(10-diff)
+            elif diff <= 12:
+                text = "Locked"
+                color = (7, 7, 206)
+
+            cv2.putText(frame, counterText , ((self.h // 2), 80),
+                                cv2.FONT_HERSHEY_TRIPLEX, 1, (213, 57, 195), 1)
+
+            
+
+        elif self.process_image:
+            text = "Searching"
+            color = (146, 255, 149)
+            self.start_time = datetime.now()
+        
+            
+        cv2.putText(frame, text , ((self.h // 2)-40, (self.w // 2) + 80),
+                                cv2.FONT_HERSHEY_TRIPLEX, .7, color, 1)
 
     def yoloRecognition(self, frame):
         # Detecting objects
@@ -182,19 +244,18 @@ class ProcessImage:
                     color = (0, 255, 0)
                 elif label == self.classes[1]:
                     color = (0, 0, 255)
-                cv2.rectangle(frame, (self.x_axis, self.y_axis), (self.x_axis +
-                              self.box_width, self.y_axis + self.box_height), color, 2)
+                #cv2.rectangle(frame, (self.x_axis, self.y_axis), (self.x_axis + self.box_width, self.y_axis + self.box_height), color, 2)
 
                 ok = self.tracker.init(
                     frame, (self.x_axis, self.y_axis, self.box_width, self.box_height))
                 self.initObj = True
 
-                cv2.putText(frame, label, (self.x_axis,
-                            self.y_axis + 30), font, 3, color, 3)
-                cv2.putText(frame, ".", (self.center_x, self.center_y),
-                            font, 3, (255, 0, 0), 3)
-                cv2.putText(frame, center_coordinates, (self.center_x,
-                            self.center_y+30), font, 1, (0, 0, 255), 2)
+                # cv2.putText(frame, label, (self.x_axis,
+                #             self.y_axis + 30), font, 3, color, 3)
+                # cv2.putText(frame, ".", (self.center_x, self.center_y),
+                #             font, 3, (255, 0, 0), 3)
+                # cv2.putText(frame, center_coordinates, (self.center_x,
+                #             self.center_y+30), font, 1, (0, 0, 255), 2)
 
     def showFPS(self, frame):
         font = cv2.FONT_HERSHEY_PLAIN
@@ -218,6 +279,12 @@ class ProcessImage:
 
     def lockTargetIdCallback(self, client, userdata, message):
         self.targetId = str(message.payload.decode("utf-8"))
+        if self.targetId == '1':
+            self.isLockedToTarget_1 = True
+        elif self.targetId == '2':
+            self.isLockedToTarget_2 = True
+        elif self.targetId == '3':
+            self.isLockedToTarget_3 = True
         print(self.targetId)
 
     def setCallbacks(self):
