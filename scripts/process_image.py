@@ -139,12 +139,27 @@ class ProcessImage:
         cv2.putText(frame, "Targets:", (self.h - 120, self.w - 85),
                                 cv2.FONT_HERSHEY_TRIPLEX, .7, (10, 238, 171), 1)
 
+        defaultTargetDateColor = (40,0,0)
+
+        target1DataColor = defaultTargetDateColor
+        target2DataColor = defaultTargetDateColor
+        target3DataColor = defaultTargetDateColor
+
+        if self.isLockedToTarget_1:
+            target1DataColor = (223, 202, 11)
+        
+        if self.isLockedToTarget_2:
+            target2DataColor = (223, 202, 11)
+
+        if self.isLockedToTarget_3:
+            target3DataColor = (223, 202, 11)
+
         cv2.putText(frame, "UAV 1: " + str(self.isLockedToTarget_1), (self.h - 120, self.w - 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, .5, (10, 20, 21), 1)
+                                cv2.FONT_HERSHEY_SIMPLEX, .5, target1DataColor, 1)
         cv2.putText(frame, "UAV 2: " + str(self.isLockedToTarget_2), (self.h - 120, self.w - 40),
-                                cv2.FONT_HERSHEY_SIMPLEX, .5, (10, 20, 21), 1)
+                                cv2.FONT_HERSHEY_SIMPLEX, .5, target2DataColor, 1)
         cv2.putText(frame, "UAV 3: " + str(self.isLockedToTarget_3), (self.h - 120, self.w - 20),
-                                cv2.FONT_HERSHEY_SIMPLEX, .5, (10, 20, 21), 1)
+                                cv2.FONT_HERSHEY_SIMPLEX, .5, target3DataColor, 1)
 
         #counter
 
@@ -159,33 +174,43 @@ class ProcessImage:
             color = (8, 7, 7)
         elif self.initObj:
             
+            if self.start_time is None:
+                self.start_time = datetime.now()
+            diff = 10 - ((datetime.now() - self.start_time).seconds)
+            
+            
             if self.process_image:
-
+                
+                
                 text = "Tracking"
                 color = (146, 255, 149)
 
-            diff = (datetime.now() - self.start_time).seconds
 
             counterText = ""
+            counterColor = (40,0,0)
 
-            if diff <= 10:
-                counterText = str(10-diff)
-            elif diff <= 12:
-                text = "Locked"
-                color = (7, 7, 206)
+            if diff >= 0:
+                counterText = str(diff)
+                if diff <= 3:
+                    counterColor = (40, 44, 215)
 
-            cv2.putText(frame, counterText , ((self.h // 2), 80),
-                                cv2.FONT_HERSHEY_TRIPLEX, 1, (213, 57, 195), 1)
+            if diff <= 1 and diff >= -1:
+                    text = "Locked"
+                    color = (7, 7, 206)
+            
+
+            cv2.putText(frame, counterText , ((self.h // 2)+55, 40),
+                                cv2.FONT_HERSHEY_DUPLEX, 1, counterColor, 1)
 
             
 
         elif self.process_image:
             text = "Searching"
-            color = (146, 255, 149)
+            color = (45, 233, 236)
             self.start_time = datetime.now()
         
             
-        cv2.putText(frame, text , ((self.h // 2)-40, (self.w // 2) + 80),
+        cv2.putText(frame, text , ((self.h // 2)-60, 40),
                                 cv2.FONT_HERSHEY_TRIPLEX, .7, color, 1)
 
     def yoloRecognition(self, frame):
