@@ -13,3 +13,5 @@ docker ps -- show executing containers
 docker container prune -- remove nonexecuting containers
 
 docker image prune -a -- remove images which have not any container
+
+server root repo: https://github.com/mehmety7/Fighter_UAV_Server_API
