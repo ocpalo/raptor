@@ -1,0 +1,5 @@
+2022-04-25 15:08:53.776849 | Connected to mqtt host: localhost, port: 1883, client id: raptor
+2022-04-25 15:08:55.202925 | Subscribed to topic raptor/land
+2022-04-25 15:08:55.203081 | Subscribed to topic raptor/processImage
+2022-04-25 15:08:55.203189 | Subscribed to topic raptor/lock
+2022-04-25 15:12:45.101230 | mqtt disconnected
