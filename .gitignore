@@ -1,5 +1,5 @@
-build/
-.vscode/
+cppAutonomous/build/
 
-scripts/__pycache__/
-scripts/*.log
+imageProcessing/__pycache__/
+imageProcessing/*.log
+imageProcessing/output.avi

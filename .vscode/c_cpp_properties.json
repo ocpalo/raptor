@@ -6,7 +6,7 @@
                 "/usr/lib/gcc",
                 "/usr/include/mavsdk",
                 "/usr/local/include/mqtt",
-                "${workspaceFolder}/header"
+                "${workspaceFolder}/cppAutonomous/header"
             ],
             "compilerPath": "/usr/bin/gcc",
             "cStandard": "gnu17",
