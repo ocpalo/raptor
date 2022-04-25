@@ -1,8 +1,19 @@
-# Workstation
+# Raptor
 
 ## System
 
 ![Untitled Diagram drawio (1)](https://user-images.githubusercontent.com/44481097/151444354-6076e238-f2ca-4cfc-bdaa-c018c288c8fa.png)
+
+## Requirements
+
+We tested this repository on Ubuntu 20.04.3 LTS. 
+
+* CMake
+* ROS Noetic(For Gazebo)
+* PX4 Autopilot
+* Mosquitto
+
+***Visit processes folders for detailed requirements***
 
 ## Languages and Versions
 
@@ -13,29 +24,12 @@
 
 ## How To Run Entire Project
 
-1. Run PX4 Simulation and Gazebo with Script
-   1. `cd PX4-Autopilot/`
-   2. `Tools/gazebo_sitl_multiple_run.sh -s "typhoon_h480:1,iris:3"`
-      * Opens Gazebo with one Typhoon H480 and 3 iris.
-      * Typhoon mavlink port is 14540, Iris's are 14541-14543
-      * Typhoon gstreamer udp port is 5600
-2. Run QGroundControl (Optional)
-   1. ./QGroundControl.AppImage
-      * In my computer its inside ~/Downloads folder. I go to that directory and run this command there
-3. Run MQTT Broker (Optional)
-   1. `mosquitto`
-4. Run Java Server (Optional)
-   1. `docker-compose up --build`
-      * Run Docker container for Java Server
-5. Run Go Client (Optional)
-   1. `go run main.go`
-      * Run Go Client to communicate with Java Server
-6. Run C++ Movement Code
-   1. `cd build` (if there is no folder named build, create it with `mkdir build`
-   2. `cmake ..`
-   3. `make`
-   4. For Typhoon          : `./main udp://:14540`
-   5. For Iris(mock drones): `./main udp://:1454<1|2|3> <[1-4]> <[1-3]>` optionals in order: port, mission, drone_id
+We use Gazebo simulation environment to test our project. We have 2 scripts to run simulation environment and project. Before running scripts, make sure every dependency is installed.
+
+* *sim_test.sh*
+    * Default script for testing the changes. It opens all necessary terminals. It runs Client,Server,Mosquitto processes automatically but you still have to run image processing and autonomous movement processes manually.
+* *ip_sim_test.sh*
+    * Specialized script for testing image processing changes. It creates 2 UAV's in Gazebo environment. Main UAV only performs takeoff action. You use WASD keys to control target drone. Before using this script, do not forget to modify image processing flags. Please read the comments at the beginning of the script file.
 
 #### Setup
 
@@ -46,21 +40,9 @@
    2. `bash ./PX4-Autopilot/Tools/setup/ubuntu.sh`
    3. `sudo apt install libignition-common3-graphics`
    4. restart the computer
-4. Install [QGroundControl](https://docs.qgroundcontrol.com/master/en/releases/daily_builds.html)
+4. Install [QGroundControl](https://docs.qgroundcontrol.com/master/en/releases/daily_builds.html) (optional)
 5. Install [Mosquitto](https://mosquitto.org)
    1. `sudo apt install mosquitto` 
-6. Install or update dependencies for C++
-   1. Update C++ Version
-      1. `sudo apt install gcc-10 && sudo apt install g++-10`
-      2. `sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 10`
-      3. `sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 10`
-      4. Test with
-         1. gcc --version
-         2. g++ --version
-   2. Install [MAVSDK](https://mavsdk.mavlink.io/v0.44/en/cpp/)
-   3. Install [Paho MQTT CPP](https://github.com/eclipse/paho.mqtt.cpp)
-7. Install or update dependencies for Go
-   1. Install [Paho MQTT for Go](https://github.com/eclipse/paho.mqtt.golang)
 
 #### Additional Links
 
