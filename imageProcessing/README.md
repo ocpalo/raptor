@@ -1,5 +1,8 @@
 
-# CUDA, CUDNN & OPENCV installation
+## Requirements
+- CUDA
+- CUDNN
+- OPENCV
 ## Before installation check versions
 
 > gcc min version 9.3.0
@@ -101,5 +104,5 @@
 
 ## Test
 
-Run [cuda_vs_cpu_time.py](https://github.com/ocpalo/raptor/blob/main/imageProcessing/cuda_vs_cpu_time.py)  CPU and CUDA times should appear if the installation is correct.
+Run [cuda_vs_cpu_time.py](https://github.com/ocpalo/raptor/tree/main/imageProcessing/build_test)  CPU and CUDA times should appear if the installation is correct.
 
