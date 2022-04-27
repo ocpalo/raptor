@@ -1,5 +1,8 @@
 
-# CUDA, CUDNN & OPENCV installation
+## Requirements
+- CUDA
+- CUDNN
+- OPENCV
 ## Before installation check versions
 
 > gcc min version 9.3.0
