@@ -12,7 +12,6 @@ import time
 
 im_topic = "im/coord"
 
-
 class ProcessImage:
     def __init__(self, mqtt_client):
         self.net = cv2.dnn.readNet("yolo_files/yolov4-tiny-custom_best.weights",
@@ -66,9 +65,7 @@ class ProcessImage:
             datetime.now(), self.w, self.h, fourcc))
         atexit.register(self.cleanup)
 
-        self.isLockedToTarget_1 = False
-        self.isLockedToTarget_2 = False
-        self.isLockedToTarget_3 = False
+        self.isLockedTargets = [False, False, False]
         self.start_time = None
 
     def cleanup(self):
@@ -78,7 +75,6 @@ class ProcessImage:
             self.logger.info(
                 "{} | Video capture and video writer released".format(datetime.now()))
 
-    # TODO this function should return x,y message
     def process(self):
         while not self.land:
             ret, frame = self.cap.read()
@@ -91,7 +87,6 @@ class ProcessImage:
             if not self.initObj:
                 self.logger.info(
                     "{} | Tracker lost the object".format(datetime.now()))
-            # TODO:: Implement image processing here
                 if self.process_image:
                     yoloResults = self.yoloRecognition(frame)
                     if yoloResults[0]:
@@ -123,9 +118,6 @@ class ProcessImage:
 
             self.showFPS(frame)
             self.drawCameraUI(frame)
-
-
-            # end of implementation
             self.video_writer.write(frame)
             cv2.imshow("Frame", frame)
 
@@ -133,8 +125,6 @@ class ProcessImage:
                 break
 
     def drawCameraUI(self, frame):
-
-        #targets
 
         cv2.putText(frame, "Targets:", (self.h - 120, self.w - 85),
                                 cv2.FONT_HERSHEY_TRIPLEX, .7, (10, 238, 171), 1)
@@ -145,23 +135,21 @@ class ProcessImage:
         target2DataColor = defaultTargetDateColor
         target3DataColor = defaultTargetDateColor
 
-        if self.isLockedToTarget_1:
+        if self.isLockedTargets[0]:
             target1DataColor = (223, 202, 11)
         
-        if self.isLockedToTarget_2:
+        if self.isLockedTargets[1]:
             target2DataColor = (223, 202, 11)
 
-        if self.isLockedToTarget_3:
+        if self.isLockedTargets[2]:
             target3DataColor = (223, 202, 11)
 
-        cv2.putText(frame, "UAV 1: " + str(self.isLockedToTarget_1), (self.h - 120, self.w - 60),
+        cv2.putText(frame, "UAV 1: " + ("Locked" if self.isLockedTargets[0] else "-"), (self.h - 120, self.w - 60),
                                 cv2.FONT_HERSHEY_SIMPLEX, .5, target1DataColor, 1)
-        cv2.putText(frame, "UAV 2: " + str(self.isLockedToTarget_2), (self.h - 120, self.w - 40),
+        cv2.putText(frame, "UAV 2: " + ("Locked" if self.isLockedTargets[1] else "-"), (self.h - 120, self.w - 40),
                                 cv2.FONT_HERSHEY_SIMPLEX, .5, target2DataColor, 1)
-        cv2.putText(frame, "UAV 3: " + str(self.isLockedToTarget_3), (self.h - 120, self.w - 20),
+        cv2.putText(frame, "UAV 3: " + ("Locked" if self.isLockedTargets[2] else "-"), (self.h - 120, self.w - 20),
                                 cv2.FONT_HERSHEY_SIMPLEX, .5, target3DataColor, 1)
-
-        #counter
 
         #mission status text
         self.drawMissionStatusText(frame)
@@ -178,13 +166,8 @@ class ProcessImage:
                 self.start_time = datetime.now()
             diff = 10 - ((datetime.now() - self.start_time).seconds)
             
-            
-            if self.process_image:
-                
-                
-                text = "Tracking"
-                color = (146, 255, 149)
-
+            text = "Tracking"
+            color = (146, 255, 149)
 
             counterText = ""
             counterColor = (40,0,0)
@@ -193,22 +176,20 @@ class ProcessImage:
                 counterText = str(diff)
                 if diff <= 3:
                     counterColor = (40, 44, 215)
+            else:
+                self.initObj = None
 
             if diff <= 1 and diff >= -1:
                     text = "Locked"
-                    color = (7, 7, 206)
+                    color = (7, 7, 206) 
             
-
             cv2.putText(frame, counterText , ((self.h // 2)+55, 40),
                                 cv2.FONT_HERSHEY_DUPLEX, 1, counterColor, 1)
 
-            
-
-        elif self.process_image:
+        else:
             text = "Searching"
             color = (45, 233, 236)
             self.start_time = datetime.now()
-        
             
         cv2.putText(frame, text , ((self.h // 2)-60, 40),
                                 cv2.FONT_HERSHEY_TRIPLEX, .7, color, 1)
@@ -269,18 +250,10 @@ class ProcessImage:
                     color = (0, 255, 0)
                 elif label == self.classes[1]:
                     color = (0, 0, 255)
-                #cv2.rectangle(frame, (self.x_axis, self.y_axis), (self.x_axis + self.box_width, self.y_axis + self.box_height), color, 2)
 
                 ok = self.tracker.init(
                     frame, (self.x_axis, self.y_axis, self.box_width, self.box_height))
                 self.initObj = True
-
-                # cv2.putText(frame, label, (self.x_axis,
-                #             self.y_axis + 30), font, 3, color, 3)
-                # cv2.putText(frame, ".", (self.center_x, self.center_y),
-                #             font, 3, (255, 0, 0), 3)
-                # cv2.putText(frame, center_coordinates, (self.center_x,
-                #             self.center_y+30), font, 1, (0, 0, 255), 2)
 
     def showFPS(self, frame):
         font = cv2.FONT_HERSHEY_PLAIN
@@ -303,14 +276,8 @@ class ProcessImage:
             datetime.now(), self.process_image))
 
     def lockTargetIdCallback(self, client, userdata, message):
-        self.targetId = str(message.payload.decode("utf-8"))
-        if self.targetId == '1':
-            self.isLockedToTarget_1 = True
-        elif self.targetId == '2':
-            self.isLockedToTarget_2 = True
-        elif self.targetId == '3':
-            self.isLockedToTarget_3 = True
-        print(self.targetId)
+        targetId = str(message.payload.decode("utf-8"))
+        self.isLockedTargets[int(targetId) - 1] = True
 
     def setCallbacks(self):
         self.mqtt_cli.subscribe("raptor/land", self.landCallback)
