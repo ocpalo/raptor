@@ -1,5 +1,9 @@
 # Raptor
 
+The following video demonstrates the project.
+
+https://user-images.githubusercontent.com/44481097/166106030-b843d3e6-ef53-44b1-a7af-2cbe798c7de4.mp4
+
 ## System
 
 ![Untitled Diagram drawio (1)](https://user-images.githubusercontent.com/44481097/151444354-6076e238-f2ca-4cfc-bdaa-c018c288c8fa.png)
